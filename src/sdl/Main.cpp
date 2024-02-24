@@ -30,6 +30,8 @@ static std::shared_ptr<IRenderer> renderer;
 
 int sdl_init(std::unique_ptr<IApplication>& app)
 {
+    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
     application = std::move(app);
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
@@ -105,7 +107,7 @@ static int sdl_init_graphics()
         return 1;
     }
 
-    renderer = std::make_shared<d3d12::Renderer>();
+    renderer = std::make_shared<d3d12::Renderer>(info.info.win.window);
     renderer->Initialize(window_width, window_height);
 
     SDL_assert_release(
@@ -225,7 +227,7 @@ static bool sdl_poll_events()
                 {
                     window_width = event.window.data1;
                     window_height = event.window.data2;
-                    renderer->Resize(window_width, window_height);
+                    renderer->SetSize(window_width, window_height);
                     break;
                 }
             }

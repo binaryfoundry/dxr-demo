@@ -206,6 +206,7 @@ if (WIN32)
         PROPERTIES
         VS_SHADER_TYPE Library
         VS_SHADER_MODEL 6.3
+        VS_SHADER_VARIABLE_NAME compiledShader
         VS_SHADER_OUTPUT_HEADER_FILE ${PROJECT_SOURCE_DIR}/src/d3d12/shaders/shader.fxh)
 
 endif ()
