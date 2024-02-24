@@ -79,7 +79,7 @@ void Application::Update()
     //    static_cast<float>(window_width) /
     //    window_height;
 
-    //renderer->Render();
+    renderer->Render();
 }
 
 void Application::ViewScale()

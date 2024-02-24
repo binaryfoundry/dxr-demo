@@ -8,6 +8,7 @@
 #include "Imgui.hpp"
 
 #include "../interfaces/IRenderer.hpp"
+#include "../d3d12/Renderer.hpp"
 
 #include <iostream>
 #include <functional>
@@ -69,6 +70,8 @@ int sdl_init(std::unique_ptr<IApplication>& app)
 
     application->Deinit();
 
+    renderer->Destroy();
+
     sdl_imgui_destroy();
     SDL_DestroyWindow(sdl_window);
     SDL_Quit();
@@ -102,7 +105,8 @@ static int sdl_init_graphics()
         return 1;
     }
 
-    // TODO Create Renderer
+    renderer = std::make_shared<d3d12::Renderer>();
+    renderer->Initialize(window_width, window_height);
 
     SDL_assert_release(
         get_win_info);

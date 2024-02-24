@@ -82,6 +82,12 @@ set(HEADERS_IMGUI
     lib/imgui/imgui/imstb_textedit.h
     lib/imgui/imgui/imstb_truetype.h)
 
+set(SOURCES_D3D12
+    src/d3d12/Renderer.cpp)
+
+set(HEADERS_D3D12
+    src/d3d12/Renderer.hpp)
+
 set(SOURCES_D3D12_SHADERS
     ${PROJECT_SOURCE_DIR}/src/d3d12/shaders/shader.hlsl)
 
@@ -102,6 +108,9 @@ SOURCE_GROUP("Source\\properties" FILES ${HEADERS_PROPERTIES})
 
 SOURCE_GROUP("Source\\imgui" FILES ${SOURCES_IMGUI})
 SOURCE_GROUP("Source\\imgui" FILES ${HEADERS_IMGUI})
+
+SOURCE_GROUP("Source\\d3d12" FILES ${SOURCES_D3D12})
+SOURCE_GROUP("Source\\d3d12" FILES ${HEADERS_D3D12})
 
 SOURCE_GROUP("Source\\d3d12\\shaders" FILES ${SOURCES_D3D12_SHADERS})
 
@@ -141,6 +150,8 @@ add_executable(
     ${HEADERS_PROPERTIES}
     ${SOURCES_IMGUI}
     ${HEADERS_IMGUI}
+    ${SOURCES_D3D12}
+    ${HEADERS_D3D12}
     ${SOURCES_D3D12_SHADERS})
 
 add_custom_target(
