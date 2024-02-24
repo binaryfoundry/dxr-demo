@@ -82,6 +82,9 @@ set(HEADERS_IMGUI
     lib/imgui/imgui/imstb_textedit.h
     lib/imgui/imgui/imstb_truetype.h)
 
+set(SOURCES_D3D12_SHADERS
+    ${PROJECT_SOURCE_DIR}/src/d3d12/shaders/shader.hlsl)
+
 SOURCE_GROUP("Source" FILES ${SOURCES})
 SOURCE_GROUP("Source" FILES ${HEADERS})
 
@@ -99,6 +102,8 @@ SOURCE_GROUP("Source\\properties" FILES ${HEADERS_PROPERTIES})
 
 SOURCE_GROUP("Source\\imgui" FILES ${SOURCES_IMGUI})
 SOURCE_GROUP("Source\\imgui" FILES ${HEADERS_IMGUI})
+
+SOURCE_GROUP("Source\\d3d12\\shaders" FILES ${SOURCES_D3D12_SHADERS})
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/lib/glm
@@ -135,7 +140,8 @@ add_executable(
     ${SOURCES_PROPERTIES}
     ${HEADERS_PROPERTIES}
     ${SOURCES_IMGUI}
-    ${HEADERS_IMGUI})
+    ${HEADERS_IMGUI}
+    ${SOURCES_D3D12_SHADERS})
 
 add_custom_target(
     ${PROJECT_files_NAME} ALL
@@ -183,5 +189,12 @@ if (WIN32)
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${SDL2_IMAGE_LIB_PATH}"
         $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+
+    set_source_files_properties(
+        ${PROJECT_SOURCE_DIR}/src/d3d12/shaders/shader.hlsl
+        PROPERTIES
+        VS_SHADER_TYPE Library
+        VS_SHADER_MODEL 6.3
+        VS_SHADER_OUTPUT_HEADER_FILE ${PROJECT_SOURCE_DIR}/src/d3d12/shaders/shader.fxh)
 
 endif ()
