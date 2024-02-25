@@ -1,11 +1,12 @@
 #pragma once
 
+
+#include <memory>
 #include <algorithm>
 #include <DirectXMath.h>
 #include <Windows.h>
-#include <d3d12.h>
-#include <dxgi1_4.h>
 
+#include "Context.hpp"
 #include "../interfaces/IRenderer.hpp"
 
 namespace d3d12
@@ -25,19 +26,16 @@ namespace d3d12
         void Destroy();
 
     private:
-        uint32_t width;
-        uint32_t height;
+        std::shared_ptr<d3d12::Context> context;
 
         HWND hwnd;
 
-        ID3D12Device5* device = nullptr;
         ID3D12CommandQueue* cmdQueue = nullptr;
         ID3D12Fence* fence = nullptr;
-        IDXGISwapChain3* swapChain = nullptr;
+
         ID3D12DescriptorHeap* uavHeap = nullptr;
 
         ID3D12Resource* renderTarget = nullptr;
-        ID3D12CommandAllocator* cmdAlloc = nullptr;
         ID3D12GraphicsCommandList4* cmdList = nullptr;
 
         ID3D12Resource* quadVB = nullptr;

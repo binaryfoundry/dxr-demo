@@ -55,7 +55,8 @@ namespace d3d12
     };
 
     Renderer::Renderer(HWND hwnd) :
-        hwnd(hwnd)
+        hwnd(hwnd),
+        context(std::make_shared<d3d12::Context>())
     {
 
     }
@@ -67,8 +68,8 @@ namespace d3d12
 
     void Renderer::Initialize(uint32_t w, uint32_t h)
     {
-        width = w;
-        height = h;
+        context->width = w;
+        context->height = h;
 
         InitDevice();
         InitSurfaces(hwnd);
@@ -83,8 +84,8 @@ namespace d3d12
 
     void Renderer::SetSize(uint32_t w, uint32_t h)
     {
-        width = w;
-        height = h;
+        context->width = w;
+        context->height = h;
 
         Resize();
     }
@@ -107,18 +108,18 @@ namespace d3d12
         D3D12CreateDevice(
             nullptr,
             D3D_FEATURE_LEVEL_12_1,
-            IID_PPV_ARGS(&device));
+            IID_PPV_ARGS(&context->device));
 
         D3D12_COMMAND_QUEUE_DESC cmdQueueDesc =
         {
             .Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
         };
 
-        device->CreateCommandQueue(
+        context->device->CreateCommandQueue(
             &cmdQueueDesc,
             IID_PPV_ARGS(&cmdQueue));
 
-        device->CreateFence(
+        context->device->CreateFence(
             0,
             D3D12_FENCE_FLAG_NONE,
             IID_PPV_ARGS(&fence));
@@ -150,7 +151,7 @@ namespace d3d12
             nullptr,
             nullptr,
             &swapChain1);
-        swapChain1->QueryInterface(&swapChain);
+        swapChain1->QueryInterface(&context->swapChain);
         swapChain1->Release();
 
         factory->Release();
@@ -162,7 +163,7 @@ namespace d3d12
             .Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE
         };
 
-        device->CreateDescriptorHeap(
+        context->device->CreateDescriptorHeap(
             &uavHeapDesc,
             IID_PPV_ARGS(&uavHeap));
 
@@ -171,7 +172,7 @@ namespace d3d12
 
     void Renderer::Resize()
     {
-        if (!swapChain) [[unlikely]]
+        if (!context->swapChain) [[unlikely]]
         {
             return;
         }
@@ -183,7 +184,7 @@ namespace d3d12
 
         Flush();
 
-        swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+        context->swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
 
         if (renderTarget) [[likely]]
         {
@@ -202,7 +203,7 @@ namespace d3d12
             .Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
         };
 
-        device->CreateCommittedResource(
+        context->device->CreateCommittedResource(
             &DEFAULT_HEAP,
             D3D12_HEAP_FLAG_NONE,
             &rtDesc,
@@ -216,7 +217,7 @@ namespace d3d12
             .ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D
         };
 
-        device->CreateUnorderedAccessView(
+        context->device->CreateUnorderedAccessView(
             renderTarget,
             nullptr,
             &uavDesc,
@@ -225,11 +226,11 @@ namespace d3d12
 
     void Renderer::InitCommand()
     {
-        device->CreateCommandAllocator(
+        context->device->CreateCommandAllocator(
             D3D12_COMMAND_LIST_TYPE_DIRECT,
-            IID_PPV_ARGS(&cmdAlloc));
+            IID_PPV_ARGS(&context->cmdAlloc));
 
-        device->CreateCommandList1(
+        context->device->CreateCommandList1(
             0,
             D3D12_COMMAND_LIST_TYPE_DIRECT,
             D3D12_COMMAND_LIST_FLAG_NONE,
@@ -242,7 +243,7 @@ namespace d3d12
             auto desc = BASIC_BUFFER_DESC;
             desc.Width = sizeof(data);
             ID3D12Resource* res;
-            device->CreateCommittedResource(
+            context->device->CreateCommittedResource(
                 &UPLOAD_HEAP,
                 D3D12_HEAP_FLAG_NONE,
                 &desc,
@@ -273,7 +274,7 @@ namespace d3d12
             desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
             ID3D12Resource* buffer;
-            device->CreateCommittedResource(
+            context->device->CreateCommittedResource(
                 &DEFAULT_HEAP,
                 D3D12_HEAP_FLAG_NONE,
                 &desc,
@@ -285,7 +286,7 @@ namespace d3d12
         };
 
         D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO prebuildInfo;
-        device->GetRaytracingAccelerationStructurePrebuildInfo(
+        context->device->GetRaytracingAccelerationStructurePrebuildInfo(
             &inputs,
             &prebuildInfo);
 
@@ -307,10 +308,10 @@ namespace d3d12
             .ScratchAccelerationStructureData = scratch->GetGPUVirtualAddress()
         };
 
-        cmdAlloc->Reset();
+        context->cmdAlloc->Reset();
 
         cmdList->Reset(
-            cmdAlloc,
+            context->cmdAlloc,
             nullptr);
 
         cmdList->BuildRaytracingAccelerationStructure(
@@ -390,7 +391,7 @@ namespace d3d12
     {
         auto instancesDesc = BASIC_BUFFER_DESC;
         instancesDesc.Width = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * NUM_INSTANCES;
-        device->CreateCommittedResource(
+        context->device->CreateCommittedResource(
             &UPLOAD_HEAP,
             D3D12_HEAP_FLAG_NONE,
             &instancesDesc,
@@ -448,7 +449,7 @@ namespace d3d12
         auto desc = BASIC_BUFFER_DESC;
         desc.Width = updateScratchSize;
         desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-        device->CreateCommittedResource(
+        context->device->CreateCommittedResource(
             &DEFAULT_HEAP,
             D3D12_HEAP_FLAG_NONE,
             &desc,
@@ -505,7 +506,7 @@ namespace d3d12
             &blob,
             nullptr);
 
-        device->CreateRootSignature(
+        context->device->CreateRootSignature(
             0,
             blob->GetBufferPointer(),
             blob->GetBufferSize(),
@@ -579,11 +580,11 @@ namespace d3d12
             .pSubobjects = subobjects
         };
 
-        device->CreateStateObject(&desc, IID_PPV_ARGS(&pso));
+        context->device->CreateStateObject(&desc, IID_PPV_ARGS(&pso));
 
         auto idDesc = BASIC_BUFFER_DESC;
         idDesc.Width = NUM_SHADER_IDS * D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
-        device->CreateCommittedResource(
+        context->device->CreateCommittedResource(
             &UPLOAD_HEAP,
             D3D12_HEAP_FLAG_NONE,
             &idDesc,
@@ -647,8 +648,8 @@ namespace d3d12
 
     void Renderer::Render()
     {
-        cmdAlloc->Reset();
-        cmdList->Reset(cmdAlloc, nullptr);
+        context->cmdAlloc->Reset();
+        cmdList->Reset(context->cmdAlloc, nullptr);
 
         UpdateScene();
 
@@ -695,8 +696,8 @@ namespace d3d12
         cmdList->DispatchRays(&dispatchDesc);
 
         ID3D12Resource* backBuffer;
-        swapChain->GetBuffer(
-            swapChain->GetCurrentBackBufferIndex(),
+        context->swapChain->GetBuffer(
+            context->swapChain->GetCurrentBackBufferIndex(),
             IID_PPV_ARGS(&backBuffer));
 
         auto barrier = [&](auto* resource, auto before, auto after) {
@@ -734,7 +735,7 @@ namespace d3d12
             1, reinterpret_cast<ID3D12CommandList**>(&cmdList));
 
         Flush();
-        swapChain->Present(1, 0);
+        context->swapChain->Present(1, 0);
     }
 
     void Renderer::Destroy()

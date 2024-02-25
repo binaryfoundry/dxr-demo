@@ -83,10 +83,12 @@ set(HEADERS_IMGUI
     lib/imgui/imgui/imstb_truetype.h)
 
 set(SOURCES_D3D12
-    src/d3d12/Renderer.cpp)
+    src/d3d12/Renderer.cpp
+    src/d3d12/Context.cpp)
 
 set(HEADERS_D3D12
-    src/d3d12/Renderer.hpp)
+    src/d3d12/Renderer.hpp
+    src/d3d12/Context.hpp)
 
 set(SOURCES_D3D12_SHADERS
     ${PROJECT_SOURCE_DIR}/src/d3d12/shaders/shader.hlsl)
