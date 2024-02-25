@@ -151,7 +151,8 @@ namespace d3d12
             nullptr,
             nullptr,
             &swapChain1);
-        swapChain1->QueryInterface(&context->swapChain);
+        swapChain1->QueryInterface(
+            &context->swapChain);
         swapChain1->Release();
 
         factory->Release();
@@ -184,7 +185,12 @@ namespace d3d12
 
         Flush();
 
-        context->swapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+        context->swapChain->ResizeBuffers(
+            0,
+            width,
+            height,
+            DXGI_FORMAT_UNKNOWN,
+            0);
 
         if (renderTarget) [[likely]]
         {
@@ -295,10 +301,12 @@ namespace d3d12
             *updateScratchSize = prebuildInfo.UpdateScratchDataSizeInBytes;
         }
 
-        auto* scratch = makeBuffer(prebuildInfo.ScratchDataSizeInBytes,
+        auto* scratch = makeBuffer(
+            prebuildInfo.ScratchDataSizeInBytes,
             D3D12_RESOURCE_STATE_COMMON);
 
-        auto* as = makeBuffer(prebuildInfo.ResultDataMaxSizeInBytes,
+        auto* as = makeBuffer(
+            prebuildInfo.ResultDataMaxSizeInBytes,
             D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE);
 
         D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildDesc =
@@ -460,8 +468,15 @@ namespace d3d12
 
     void Renderer::InitBottomLevel()
     {
-        quadBlas = MakeBLAS(quadVB, std::size(quadVtx));
-        cubeBlas = MakeBLAS(cubeVB, std::size(cubeVtx), cubeIB, std::size(cubeIdx));
+        quadBlas = MakeBLAS(
+            quadVB,
+            std::size(quadVtx));
+
+        cubeBlas = MakeBLAS(
+            cubeVB,
+            std::size(cubeVtx),
+            cubeIB,
+            std::size(cubeIdx));
     }
 
     void Renderer::InitRootSignature()
@@ -700,7 +715,8 @@ namespace d3d12
             context->swapChain->GetCurrentBackBufferIndex(),
             IID_PPV_ARGS(&backBuffer));
 
-        auto barrier = [&](auto* resource, auto before, auto after) {
+        auto barrier = [&](auto* resource, auto before, auto after)
+        {
             D3D12_RESOURCE_BARRIER rb =
             {
                 .Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION,
@@ -714,18 +730,28 @@ namespace d3d12
             cmdList->ResourceBarrier(1, &rb);
         };
 
-        barrier(renderTarget, D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+        barrier(
+            renderTarget,
+            D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
             D3D12_RESOURCE_STATE_COPY_SOURCE);
 
-        barrier(backBuffer, D3D12_RESOURCE_STATE_PRESENT,
+        barrier(
+            backBuffer,
+            D3D12_RESOURCE_STATE_PRESENT,
             D3D12_RESOURCE_STATE_COPY_DEST);
 
-        cmdList->CopyResource(backBuffer, renderTarget);
+        cmdList->CopyResource(
+            backBuffer,
+            renderTarget);
 
-        barrier(backBuffer, D3D12_RESOURCE_STATE_COPY_DEST,
+        barrier(
+            backBuffer,
+            D3D12_RESOURCE_STATE_COPY_DEST,
             D3D12_RESOURCE_STATE_PRESENT);
 
-        barrier(renderTarget, D3D12_RESOURCE_STATE_COPY_SOURCE,
+        barrier(
+            renderTarget,
+            D3D12_RESOURCE_STATE_COPY_SOURCE,
             D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
         backBuffer->Release();
