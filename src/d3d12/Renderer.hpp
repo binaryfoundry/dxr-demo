@@ -78,10 +78,15 @@ namespace d3d12
             const D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS& inputs,
             UINT64* updateScratchSize = nullptr);
 
-        ID3D12Resource* MakeBLAS(ID3D12Resource* vertexBuffer, UINT vertexFloats,
-            ID3D12Resource* indexBuffer = nullptr, UINT indices = 0);
+        ID3D12Resource* MakeBLAS(
+            ID3D12Resource* vertexBuffer,
+            UINT vertexFloats,
+            ID3D12Resource* indexBuffer = nullptr,
+            UINT indices = 0);
 
-        ID3D12Resource* MakeTLAS(ID3D12Resource* instances, UINT numInstances,
+        ID3D12Resource* MakeTLAS(
+            ID3D12Resource* instances,
+            UINT numInstances,
             UINT64* updateScratchSize);
     };
 }
