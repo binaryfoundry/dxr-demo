@@ -27,18 +27,18 @@ namespace d3d12
         uint32_t height = 0;
 
         ID3D12Device5* device = nullptr;
-        ID3D12CommandAllocator* cmdAlloc = nullptr;
-        IDXGISwapChain3* swapChain = nullptr;
-        ID3D12DescriptorHeap* uavHeap = nullptr;
-        ID3D12CommandQueue* cmdQueue = nullptr;
+        ID3D12CommandAllocator* cmd_alloc = nullptr;
+        IDXGISwapChain3* swap_chain = nullptr;
+        ID3D12DescriptorHeap* uav_heap = nullptr;
+        ID3D12CommandQueue* cmd_queue = nullptr;
 
         ID3D12Fence* fence = nullptr;
-        ID3D12Resource* renderTarget = nullptr;
+        ID3D12Resource* render_target = nullptr;
 
         void Flush()
         {
             static UINT64 value = 1;
-            cmdQueue->Signal(fence, value);
+            cmd_queue->Signal(fence, value);
             fence->SetEventOnCompletion(value++, nullptr);
         }
     };

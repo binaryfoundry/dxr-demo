@@ -61,7 +61,7 @@ namespace d3d12
 
         context->device->CreateCommandQueue(
             &cmdQueueDesc,
-            IID_PPV_ARGS(&context->cmdQueue));
+            IID_PPV_ARGS(&context->cmd_queue));
 
         context->device->CreateFence(
             0,
@@ -89,14 +89,14 @@ namespace d3d12
 
         IDXGISwapChain1* swapChain1;
         factory->CreateSwapChainForHwnd(
-            context->cmdQueue,
+            context->cmd_queue,
             hwnd,
             &swapChainDesc,
             nullptr,
             nullptr,
             &swapChain1);
         swapChain1->QueryInterface(
-            &context->swapChain);
+            &context->swap_chain);
         swapChain1->Release();
 
         factory->Release();
@@ -110,14 +110,14 @@ namespace d3d12
 
         context->device->CreateDescriptorHeap(
             &uavHeapDesc,
-            IID_PPV_ARGS(&context->uavHeap));
+            IID_PPV_ARGS(&context->uav_heap));
 
         Resize();
     }
 
     void Renderer::Resize()
     {
-        if (!context->swapChain) [[unlikely]]
+        if (!context->swap_chain) [[unlikely]]
         {
             return;
         }
@@ -129,19 +129,19 @@ namespace d3d12
 
         context->Flush();
 
-        context->swapChain->ResizeBuffers(
+        context->swap_chain->ResizeBuffers(
             0,
             width,
             height,
             DXGI_FORMAT_UNKNOWN,
             0);
 
-        if (context->renderTarget) [[likely]]
+        if (context->render_target) [[likely]]
         {
-            context->renderTarget->Release();
+            context->render_target->Release();
         }
 
-        D3D12_RESOURCE_DESC rtDesc =
+        D3D12_RESOURCE_DESC rt_desc =
         {
             .Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
             .Width = width,
@@ -156,22 +156,22 @@ namespace d3d12
         context->device->CreateCommittedResource(
             &DEFAULT_HEAP,
             D3D12_HEAP_FLAG_NONE,
-            &rtDesc,
+            &rt_desc,
             D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
             nullptr,
-            IID_PPV_ARGS(&context->renderTarget));
+            IID_PPV_ARGS(&context->render_target));
 
-        D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc =
+        D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc =
         {
             .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
             .ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D
         };
 
         context->device->CreateUnorderedAccessView(
-            context->renderTarget,
+            context->render_target,
             nullptr,
-            &uavDesc,
-            context->uavHeap->GetCPUDescriptorHandleForHeapStart());
+            &uav_desc,
+            context->uav_heap->GetCPUDescriptorHandleForHeapStart());
     }
 
     void Renderer::Render()

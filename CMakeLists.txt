@@ -83,13 +83,19 @@ set(HEADERS_IMGUI
     lib/imgui/imgui/imstb_truetype.h)
 
 set(SOURCES_D3D12
+    src/d3d12/Allocator.cpp
     src/d3d12/Renderer.cpp
     src/d3d12/Context.cpp
+    src/d3d12/Descriptor.cpp
+    src/d3d12/Frame.cpp
     src/d3d12/Raytracing.cpp)
 
 set(HEADERS_D3D12
+    src/d3d12/Allocator.hpp
     src/d3d12/Renderer.hpp
     src/d3d12/Context.hpp
+    src/d3d12/Descriptor.hpp
+    src/d3d12/Frame.hpp
     src/d3d12/Raytracing.hpp)
 
 set(SOURCES_D3D12_SHADERS
@@ -119,6 +125,7 @@ SOURCE_GROUP("Source\\d3d12" FILES ${HEADERS_D3D12})
 SOURCE_GROUP("Source\\d3d12\\shaders" FILES ${SOURCES_D3D12_SHADERS})
 
 include_directories(
+    ${PROJECT_SOURCE_DIR}/lib/d3d12
     ${PROJECT_SOURCE_DIR}/lib/glm
     ${PROJECT_SOURCE_DIR}/lib/stb
     ${PROJECT_SOURCE_DIR}/lib/imgui)
