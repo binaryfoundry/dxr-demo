@@ -149,7 +149,7 @@ namespace d3d12
         context->cmd_alloc->Reset();
 
         cmd_list->Reset(
-            context->cmd_alloc,
+            context->cmd_alloc.Get(),
             nullptr);
 
         cmd_list->BuildRaytracingAccelerationStructure(
@@ -162,7 +162,7 @@ namespace d3d12
         context->cmd_queue->ExecuteCommandLists(
             1, reinterpret_cast<ID3D12CommandList**>(&cmd_list));
 
-        context->Flush();
+        //context->Flush();
 
         scratch->Release();
         return as;
@@ -492,9 +492,9 @@ namespace d3d12
     }
 
     void Raytracing::Render()
-    {
+    {/*
         context->cmd_alloc->Reset();
-        cmd_list->Reset(context->cmd_alloc, nullptr);
+        cmd_list->Reset(context->cmd_alloc.Get(), nullptr);
 
         UpdateScene();
 
@@ -561,7 +561,7 @@ namespace d3d12
         };
 
         barrier(
-            context->render_target,
+            context->render_target.Get(),
             D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
             D3D12_RESOURCE_STATE_COPY_SOURCE);
 
@@ -572,7 +572,7 @@ namespace d3d12
 
         cmd_list->CopyResource(
             back_buffer,
-            context->render_target);
+            context->render_target.Get());
 
         barrier(
             back_buffer,
@@ -580,7 +580,7 @@ namespace d3d12
             D3D12_RESOURCE_STATE_PRESENT);
 
         barrier(
-            context->render_target,
+            context->render_target.Get(),
             D3D12_RESOURCE_STATE_COPY_SOURCE,
             D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
@@ -591,7 +591,7 @@ namespace d3d12
             1, reinterpret_cast<ID3D12CommandList**>(&cmd_list));
 
         context->Flush();
-        context->swap_chain->Present(1, 0);
+        context->swap_chain->Present(1, 0);*/
     }
 
 }

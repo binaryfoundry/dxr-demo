@@ -3,6 +3,10 @@
 #include <d3d12.h>
 #include <dxgi1_4.h>
 
+#include <wrl.h>
+
+using Microsoft::WRL::ComPtr;
+
 namespace d3d12
 {
     constexpr D3D12_HEAP_PROPERTIES UPLOAD_HEAP =
@@ -23,23 +27,16 @@ namespace d3d12
 
     struct Context
     {
+        size_t frame_index = 0;
+
         uint32_t width = 0;
         uint32_t height = 0;
 
-        ID3D12Device5* device = nullptr;
-        ID3D12CommandAllocator* cmd_alloc = nullptr;
-        IDXGISwapChain3* swap_chain = nullptr;
-        ID3D12DescriptorHeap* uav_heap = nullptr;
-        ID3D12CommandQueue* cmd_queue = nullptr;
+        ComPtr<ID3D12Device5> device = nullptr;
+        ComPtr<ID3D12CommandAllocator> cmd_alloc = nullptr;
+        ComPtr<IDXGISwapChain3> swap_chain = nullptr;
+        ComPtr<ID3D12CommandQueue> cmd_queue = nullptr;
 
-        ID3D12Fence* fence = nullptr;
-        ID3D12Resource* render_target = nullptr;
-
-        void Flush()
-        {
-            static UINT64 value = 1;
-            cmd_queue->Signal(fence, value);
-            fence->SetEventOnCompletion(value++, nullptr);
-        }
+        ComPtr<ID3D12Fence> fence = nullptr;
     };
 }

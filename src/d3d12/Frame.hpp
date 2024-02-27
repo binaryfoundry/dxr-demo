@@ -1,13 +1,10 @@
 #pragma once
 
 #include <vector>
-#include <wrl.h>
 
 #include "Allocator.hpp"
 #include "Context.hpp"
 #include "Descriptor.hpp"
-
-using Microsoft::WRL::ComPtr;
 
 namespace d3d12
 {
@@ -16,14 +13,14 @@ namespace d3d12
 
     struct Frame
     {
-        ComPtr<ID3D12CommandAllocator> command_allocator_;
+        ComPtr<ID3D12CommandAllocator> command_allocator;
 
-        ComPtr<ID3D12Resource> render_target_;
-        DescriptorHandle rtv_handle_;
+        ComPtr<ID3D12Resource> render_target;
+        DescriptorHandle rtv_handle;
 
-        std::vector<D3D12MA::ResourcePtr> resources_to_release_;
-        std::vector<DescriptorHandle> handles_to_release_;
+        std::vector<D3D12MA::ResourcePtr> resources_to_release;
+        std::vector<DescriptorHandle> handles_to_release;
 
-        UINT64 fence_value_ = 0;
-    } frames_[FRAME_COUNT];
+        UINT64 fence_value = 0;
+    };
 }
