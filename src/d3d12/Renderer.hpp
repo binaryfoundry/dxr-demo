@@ -1,6 +1,5 @@
 #pragma once
 
-#include <array>
 #include <memory>
 #include <algorithm>
 
@@ -39,20 +38,11 @@ namespace d3d12
         void ReleaseWhenFrameComplete(D3D12MA::ResourcePtr&& resource);
         void ReleaseWhenFrameComplete(DescriptorHandle&& handle);
 
-        Frame& CurrentFrame()
-        {
-            return frames[context->frame_index];
-        }
-
         bool resize_swapchain = false;
         D3D12MA::Allocator* allocator = nullptr;
         std::unique_ptr<DescriptorAllocator> descriptor_allocator;
         std::unique_ptr<GPUDescriptorRingBuffer> gpu_descriptor_ring_buffer;
 
-        std::array<Frame, FRAME_COUNT> frames;
-
-        ComPtr<ID3D12CommandQueue> command_queue;
-        ComPtr<ID3D12GraphicsCommandList> command_list;
         HANDLE fence_event;
     };
 }
