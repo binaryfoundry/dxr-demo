@@ -136,7 +136,14 @@ namespace d3d12
 
         context->frames[0].command_allocator->Reset();
 
-        auto command_list = context->command_list.Get();
+        ID3D12GraphicsCommandList4* command_list;
+
+        context->device->CreateCommandList(
+            0,
+            D3D12_COMMAND_LIST_TYPE_DIRECT,
+            context->frames[0].command_allocator.Get(),
+            nullptr,
+            IID_PPV_ARGS(&command_list));
 
         command_list->Reset(
             context->frames[0].command_allocator.Get(),

@@ -116,15 +116,6 @@ namespace d3d12
             D3D12_FENCE_FLAG_NONE,
             IID_PPV_ARGS(&context->fence));
 
-        context->device->CreateCommandList(
-            0,
-            D3D12_COMMAND_LIST_TYPE_DIRECT,
-            context->frames[0].command_allocator.Get(),
-            nullptr,
-            IID_PPV_ARGS(&context->command_list));
-
-        context->command_list->Close();
-
         raytracing = std::make_unique<d3d12::Raytracing>(context);
         raytracing->Initialize();
 
@@ -140,6 +131,15 @@ namespace d3d12
         {
             //LogIfFailed(HRESULT_FROM_WIN32(GetLastError()));
         }
+
+        context->device->CreateCommandList(
+            0,
+            D3D12_COMMAND_LIST_TYPE_DIRECT,
+            context->frames[0].command_allocator.Get(),
+            nullptr,
+            IID_PPV_ARGS(&context->command_list));
+
+        context->command_list->Close();
 
         ResetCommandList();
     }
