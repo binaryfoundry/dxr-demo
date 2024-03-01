@@ -30,10 +30,10 @@ namespace d3d12
             frame.rtv_handle = DescriptorHandle();
         }
 
-        if (allocator)
+        if (context->allocator)
         {
-            allocator->Release();
-            allocator = nullptr;
+            context->allocator->Release();
+            context->allocator = nullptr;
         }
     }
 
@@ -58,12 +58,12 @@ namespace d3d12
         alloc_desc.pDevice = context->device.Get();
         alloc_desc.PreferredBlockSize = 32ull * 1024 * 1024;
 
-        D3D12MA::CreateAllocator(&alloc_desc, &allocator);
+        D3D12MA::CreateAllocator(&alloc_desc, &context->allocator);
 
-        descriptor_allocator.reset(
+        context->descriptor_allocator.reset(
             new DescriptorAllocator(context->device.Get()));
 
-        gpu_descriptor_ring_buffer.reset(
+        context->gpu_descriptor_ring_buffer.reset(
             new GPUDescriptorRingBuffer(context->device.Get()));
 
         D3D12_COMMAND_QUEUE_DESC cmd_queue_desc =
@@ -173,7 +173,7 @@ namespace d3d12
                 n,
                 IID_PPV_ARGS(&context->frames[n].render_target));
 
-            context->frames[n].rtv_handle = descriptor_allocator->Create(
+            context->frames[n].rtv_handle = context->descriptor_allocator->Create(
                 D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
             D3D12_RENDER_TARGET_VIEW_DESC rtv_desc = {};
@@ -239,7 +239,7 @@ namespace d3d12
 
         ID3D12DescriptorHeap* pp_heaps[] =
         {
-            gpu_descriptor_ring_buffer->descriptor_heap()
+            context->gpu_descriptor_ring_buffer->descriptor_heap()
         };
 
         context->command_list->SetDescriptorHeaps(

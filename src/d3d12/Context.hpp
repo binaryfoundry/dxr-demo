@@ -10,6 +10,7 @@
 using Microsoft::WRL::ComPtr;
 
 #include "Frame.hpp"
+#include "Allocator.hpp"
 
 namespace d3d12
 {
@@ -45,6 +46,10 @@ namespace d3d12
         ComPtr<ID3D12Fence> fence = nullptr;
 
         std::array<Frame, FRAME_COUNT> frames;
+
+        D3D12MA::Allocator* allocator = nullptr;
+        std::unique_ptr<DescriptorAllocator> descriptor_allocator;
+        std::unique_ptr<GPUDescriptorRingBuffer> gpu_descriptor_ring_buffer;
 
         Frame& CurrentFrame()
         {

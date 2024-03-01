@@ -39,9 +39,6 @@ namespace d3d12
         void ReleaseWhenFrameComplete(DescriptorHandle&& handle);
 
         bool resize_swapchain = false;
-        D3D12MA::Allocator* allocator = nullptr;
-        std::unique_ptr<DescriptorAllocator> descriptor_allocator;
-        std::unique_ptr<GPUDescriptorRingBuffer> gpu_descriptor_ring_buffer;
 
         HANDLE fence_event;
     };
