@@ -88,7 +88,8 @@ set(SOURCES_D3D12
     src/d3d12/Context.cpp
     src/d3d12/Descriptor.cpp
     src/d3d12/Frame.cpp
-    src/d3d12/Raytracing.cpp)
+    src/d3d12/Raytracing.cpp
+    src/d3d12/Imgui.cpp)
 
 set(HEADERS_D3D12
     src/d3d12/Allocator.hpp
@@ -96,7 +97,8 @@ set(HEADERS_D3D12
     src/d3d12/Context.hpp
     src/d3d12/Descriptor.hpp
     src/d3d12/Frame.hpp
-    src/d3d12/Raytracing.hpp)
+    src/d3d12/Raytracing.hpp
+    src/d3d12/Imgui.hpp)
 
 set(SOURCES_D3D12_SHADERS
     ${PROJECT_SOURCE_DIR}/src/d3d12/shaders/shader.hlsl)
