@@ -24,9 +24,19 @@ namespace d3d12
         ComPtr<ID3D12Resource> render_target;
         DescriptorHandle rtv_handle;
 
+        UINT64 fence_value = 0;
+
         std::vector<D3D12MA::ResourcePtr> resources_to_release;
         std::vector<DescriptorHandle> handles_to_release;
 
-        UINT64 fence_value = 0;
+        void ReleaseWhenFrameComplete(D3D12MA::ResourcePtr&& resource)
+        {
+            resources_to_release.emplace_back(std::move(resource));
+        }
+
+        void ReleaseWhenFrameComplete(DescriptorHandle&& handle)
+        {
+            handles_to_release.emplace_back(std::move(handle));
+        }
     };
 }

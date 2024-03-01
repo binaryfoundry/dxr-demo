@@ -326,16 +326,6 @@ namespace d3d12
         raytracing->Resize();
     }
 
-    void Renderer::ReleaseWhenFrameComplete(D3D12MA::ResourcePtr&& resource)
-    {
-        context->CurrentFrame().resources_to_release.emplace_back(std::move(resource));
-    }
-
-    void Renderer::ReleaseWhenFrameComplete(DescriptorHandle&& handle)
-    {
-        context->CurrentFrame().handles_to_release.emplace_back(std::move(handle));
-    }
-
     void Renderer::Render()
     {
         auto barrier_0 = CD3DX12_RESOURCE_BARRIER::Transition(

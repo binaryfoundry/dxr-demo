@@ -145,6 +145,8 @@ namespace d3d12
             nullptr,
             IID_PPV_ARGS(&command_list));
 
+        command_list->Close();
+
         command_list->Reset(
             context->frames[0].command_allocator.Get(),
             nullptr);
@@ -167,48 +169,54 @@ namespace d3d12
 
     void Raytracing::InitScene()
     {
-        auto instancesDesc = BASIC_BUFFER_DESC;
-        instancesDesc.Width = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * NUM_INSTANCES;
-        context->device->CreateCommittedResource(
-            &UPLOAD_HEAP,
-            D3D12_HEAP_FLAG_NONE,
-            &instancesDesc,
-            D3D12_RESOURCE_STATE_COMMON,
-            nullptr,
-            IID_PPV_ARGS(&instances));
-        instances->Map(0, nullptr, reinterpret_cast<void**>(&instance_data));
-
-        for (UINT i = 0; i < NUM_INSTANCES; ++i)
+        for (UINT n = 0; n < FRAME_COUNT; n++)
         {
-            instance_data[i] =
-            {
-                .InstanceID = i,
-                .InstanceMask = 1,
-                .AccelerationStructure = (i ? quad_blas : cube_blas)->GetGPUVirtualAddress(),
-            };
-        }
+            auto instances_desc = BASIC_BUFFER_DESC;
+            instances_desc.Width = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * NUM_INSTANCES;
+            context->device->CreateCommittedResource(
+                &UPLOAD_HEAP,
+                D3D12_HEAP_FLAG_NONE,
+                &instances_desc,
+                D3D12_RESOURCE_STATE_COMMON,
+                nullptr,
+                IID_PPV_ARGS(&frame_resources[n].instances));
 
-        UpdateTransforms();
+            frame_resources[n].instances->Map(0, nullptr, reinterpret_cast<void**>(
+                &frame_resources[n].instance_data));
+
+            for (UINT i = 0; i < NUM_INSTANCES; ++i)
+            {
+                frame_resources[n].instance_data[i] =
+                {
+                    .InstanceID = i,
+                    .InstanceMask = 1,
+                    .AccelerationStructure = (i ? quad_blas : cube_blas)->GetGPUVirtualAddress(),
+                };
+            }
+        }
     }
 
     void Raytracing::InitTopLevel()
     {
-        UINT64 update_scratch_size;
-        tlas = MakeTLAS(
-            instances,
-            NUM_INSTANCES,
-            &update_scratch_size);
+        for (UINT n = 0; n < FRAME_COUNT; n++)
+        {
+            UINT64 update_scratch_size;
+            frame_resources[n].tlas = MakeTLAS(
+                frame_resources[n].instances.Get(),
+                NUM_INSTANCES,
+                &update_scratch_size);
 
-        auto desc = BASIC_BUFFER_DESC;
-        desc.Width = update_scratch_size;
-        desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-        context->device->CreateCommittedResource(
-            &DEFAULT_HEAP,
-            D3D12_HEAP_FLAG_NONE,
-            &desc,
-            D3D12_RESOURCE_STATE_COMMON,
-            nullptr,
-            IID_PPV_ARGS(&tlas_update_scratch));
+            auto desc = BASIC_BUFFER_DESC;
+            desc.Width = update_scratch_size;
+            desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+            context->device->CreateCommittedResource(
+                &DEFAULT_HEAP,
+                D3D12_HEAP_FLAG_NONE,
+                &desc,
+                D3D12_RESOURCE_STATE_COMMON,
+                nullptr,
+                IID_PPV_ARGS(&frame_resources[n].tlas_update_scratch));
+        }
     }
 
     void Raytracing::InitBottomLevel()
@@ -443,9 +451,9 @@ namespace d3d12
 
         for (UINT i = 0; i < FRAME_COUNT; i++)
         {
-            if (uav_heaps[i].Get()) [[likely]]
+            if (frame_resources[i].uav_heap.Get()) [[likely]]
             {
-                uav_heaps[i].Get()->Release();
+                frame_resources[i].uav_heap.Get()->Release();
             }
 
             ID3D12DescriptorHeap* uav_heap;
@@ -461,11 +469,11 @@ namespace d3d12
                 &uav_heap_desc,
                 IID_PPV_ARGS(&uav_heap));
 
-            uav_heaps[i] = uav_heap;
+            frame_resources[i].uav_heap = uav_heap;
 
-            if (render_targets[i].Get()) [[likely]]
+            if (frame_resources[i].render_target.Get()) [[likely]]
             {
-                render_targets[i].Get()->Release();
+                frame_resources[i].render_target.Get()->Release();
             }
 
             ID3D12Resource* render_target;
@@ -502,20 +510,24 @@ namespace d3d12
                 &uav_desc,
                 uav_heap->GetCPUDescriptorHandleForHeapStart());
 
-            render_targets[i] = render_target;
+            frame_resources[i].render_target = render_target;
         }
     }
+
+    static float time = 0.0f;
 
     void Raytracing::UpdateTransforms()
     {
         using namespace DirectX;
         auto set = [&](int idx, XMMATRIX mx)
         {
-            auto* ptr = reinterpret_cast<XMFLOAT3X4*>(&instance_data[idx].Transform);
+            auto* ptr = reinterpret_cast<XMFLOAT3X4*>(
+                &FrameResources().instance_data[idx].Transform);
+
             XMStoreFloat3x4(ptr, mx);
         };
 
-        auto time = static_cast<float>(GetTickCount64()) / 1000;
+        time += 0.01f;
 
         auto cube = XMMatrixRotationRollPitchYaw(time / 2, time / 3, time / 5);
         cube *= XMMatrixTranslation(-1.5, 2, 2);
@@ -537,27 +549,30 @@ namespace d3d12
 
         D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC desc =
         {
-            .DestAccelerationStructureData = tlas->GetGPUVirtualAddress(),
+            .DestAccelerationStructureData = FrameResources().tlas->GetGPUVirtualAddress(),
             .Inputs =
             {
                 .Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL,
                 .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE,
                 .NumDescs = NUM_INSTANCES,
                 .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY,
-                .InstanceDescs = instances->GetGPUVirtualAddress()
+                .InstanceDescs = FrameResources().instances->GetGPUVirtualAddress()
             },
-            .SourceAccelerationStructureData = tlas->GetGPUVirtualAddress(),
-            .ScratchAccelerationStructureData = tlas_update_scratch->GetGPUVirtualAddress(),
+            .SourceAccelerationStructureData = FrameResources().tlas->GetGPUVirtualAddress(),
+            .ScratchAccelerationStructureData = FrameResources().tlas_update_scratch->GetGPUVirtualAddress(),
         };
 
-        context->command_list->BuildRaytracingAccelerationStructure(&desc, 0, nullptr);
+        context->command_list->BuildRaytracingAccelerationStructure(
+            &desc,
+            0,
+            nullptr);
 
         D3D12_RESOURCE_BARRIER barrier =
         {
             .Type = D3D12_RESOURCE_BARRIER_TYPE_UAV,
             .UAV =
             {
-                .pResource = tlas
+                .pResource = FrameResources().tlas.Get()
             }
         };
 
@@ -574,7 +589,7 @@ namespace d3d12
         context->command_list->SetComputeRootSignature(
             root_signature);
 
-        ID3D12DescriptorHeap* uav_heap = uav_heaps[context->frame_index].Get();
+        ID3D12DescriptorHeap* uav_heap = FrameResources().uav_heap.Get();
 
         context->command_list->SetDescriptorHeaps(1, &uav_heap);
 
@@ -585,7 +600,7 @@ namespace d3d12
 
         context->command_list->SetComputeRootShaderResourceView(
             1,
-            tlas->GetGPUVirtualAddress());
+            FrameResources().tlas->GetGPUVirtualAddress());
 
         auto rt_desc = context->CurrentFrame().render_target->GetDesc();
 
@@ -635,7 +650,7 @@ namespace d3d12
             context->command_list->ResourceBarrier(1, &rb);
         };
 
-        auto* render_target = render_targets[context->frame_index].Get();
+        auto* render_target = FrameResources().render_target.Get();
 
         barrier(
             render_target,
