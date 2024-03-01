@@ -128,15 +128,6 @@ namespace d3d12
         raytracing = std::make_unique<d3d12::Raytracing>(context);
         raytracing->Initialize();
 
-        //ID3D12CommandList* pp_command_lists[] =
-        //{
-        //    context->command_list.Get()
-        //};
-
-        //context->command_queue->ExecuteCommandLists(
-        //    _countof(pp_command_lists),
-        //    pp_command_lists);
-
         context->CurrentFrame().fence_value++;
 
         fence_event = CreateEvent(
@@ -217,9 +208,6 @@ namespace d3d12
         cur_frame.resources_to_release.clear();
         cur_frame.handles_to_release.clear();
 
-        //cur_frame.constant_buffer_pool_.Reset();
-        //cur_frame.constant_buffer_pool_backbuffer_.Reset();
-
         ResetCommandList();
     }
 
@@ -227,15 +215,9 @@ namespace d3d12
     {
         context->CurrentFrame().command_allocator->Reset();
 
-        //render_state_.Reset();
-
         context->command_list->Reset(
             context->CurrentFrame().command_allocator.Get(),
             nullptr);
-        //pipeline_state().Get());
-
-        //command_list->SetGraphicsRootSignature(
-        //    root_signature_.Get());
 
         ID3D12DescriptorHeap* pp_heaps[] =
         {
@@ -375,11 +357,11 @@ namespace d3d12
             nullptr);
 
         const FLOAT clear_color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-        //command_list->ClearRenderTargetView(
-        //    rtv_handle,
-        //    clear_color,
-        //    0,
-        //    nullptr);
+        context->command_list->ClearRenderTargetView(
+            rtv_handle,
+            clear_color,
+            0,
+            nullptr);
 
         CD3DX12_VIEWPORT viewport(
             0.0f,
