@@ -1,7 +1,7 @@
 #include "Application.hpp"
 
 #include "Input.hpp"
-#include "imgui/imgui.h"
+#include "imgui.h"
 #include "math/Random.hpp"
 
 #include <array>
@@ -109,7 +109,7 @@ void Application::ViewScale()
 
 bool Application::GuiUpdate()
 {
-    /*ImGui::NewFrame();
+    ImGui::NewFrame();
 
     ImGui::Begin(
         "Menu",
@@ -122,6 +122,6 @@ bool Application::GuiUpdate()
         1000.0f / fps_time_avg);
 
     ImGui::End();
-    */
+
     return false;
 }

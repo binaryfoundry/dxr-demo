@@ -5,6 +5,7 @@
 
 #include "Frame.hpp"
 #include "Context.hpp"
+#include "Imgui.hpp"
 #include "Raytracing.hpp"
 #include "../interfaces/IRenderer.hpp"
 
@@ -25,6 +26,7 @@ namespace d3d12
         HWND hwnd;
 
         std::shared_ptr<d3d12::Context> context;
+        std::unique_ptr<d3d12::Imgui> imgui;
         std::unique_ptr<d3d12::Raytracing> raytracing;
 
         void ResizeSwapChain();
@@ -34,9 +36,6 @@ namespace d3d12
         void ResetCommandList();
         void FlushGpu();
         void WaitForGpu();
-
-        void ReleaseWhenFrameComplete(D3D12MA::ResourcePtr&& resource);
-        void ReleaseWhenFrameComplete(DescriptorHandle&& handle);
 
         bool resize_swapchain = false;
 

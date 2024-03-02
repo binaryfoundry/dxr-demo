@@ -116,6 +116,8 @@ namespace d3d12
             D3D12_FENCE_FLAG_NONE,
             IID_PPV_ARGS(&context->fence));
 
+        imgui = std::make_unique<d3d12::Imgui>(context);
+
         raytracing = std::make_unique<d3d12::Raytracing>(context);
         raytracing->Initialize();
 
@@ -370,6 +372,7 @@ namespace d3d12
             1, &scissor_rect);
 
         raytracing->Render();
+        imgui->Render();
 
         auto barrier_1 = CD3DX12_RESOURCE_BARRIER::Transition(
             context->CurrentFrame().render_target.Get(),

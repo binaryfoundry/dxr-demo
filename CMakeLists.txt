@@ -130,7 +130,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/lib/d3d12
     ${PROJECT_SOURCE_DIR}/lib/glm
     ${PROJECT_SOURCE_DIR}/lib/stb
-    ${PROJECT_SOURCE_DIR}/lib/imgui)
+    ${PROJECT_SOURCE_DIR}/lib/imgui/imgui)
 
 if (WIN32)
     message(STATUS "Platform: Windows")

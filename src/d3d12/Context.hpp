@@ -41,7 +41,6 @@ namespace d3d12
         ComPtr<IDXGISwapChain3> swap_chain = nullptr;
 
         ComPtr<ID3D12CommandQueue> command_queue;
-        ComPtr<ID3D12GraphicsCommandList4> command_list;
 
         ComPtr<ID3D12Fence> fence = nullptr;
 
@@ -50,6 +49,9 @@ namespace d3d12
         D3D12MA::Allocator* allocator = nullptr;
         std::unique_ptr<DescriptorAllocator> descriptor_allocator;
         std::unique_ptr<GPUDescriptorRingBuffer> gpu_descriptor_ring_buffer;
+
+        ComPtr<ID3D12GraphicsCommandList4> command_list;
+        //ComPtr<ID3D12GraphicsCommandList4> command_list_4;
 
         Frame& CurrentFrame()
         {

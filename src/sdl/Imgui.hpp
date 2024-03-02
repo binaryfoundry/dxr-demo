@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SDL.hpp"
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 // https://github.com/ocornut/imgui/blob/master/examples/imgui_impl_sdl.cpp
 

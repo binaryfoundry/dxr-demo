@@ -64,8 +64,8 @@ int sdl_init(std::unique_ptr<IApplication>& app)
 
         done = sdl_poll_events();
 
-        //sdl_imgui_update_input(sdl_window);
-        //sdl_imgui_update_cursor();
+        sdl_imgui_update_input(sdl_window);
+        sdl_imgui_update_cursor();
 
         application->Update();
     }
