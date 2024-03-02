@@ -326,6 +326,7 @@ namespace d3d12
             cmds_lists.data());
 
         raytracing->Resize();
+        imgui->Resize();
     }
 
     void Renderer::Render()

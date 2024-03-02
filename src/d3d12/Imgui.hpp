@@ -12,6 +12,7 @@ namespace d3d12
         Imgui(std::shared_ptr<Context> context);
         virtual ~Imgui();
         void Render();
+        void Resize();
 
     private:
         std::shared_ptr<Context> context;

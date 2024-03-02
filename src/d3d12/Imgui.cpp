@@ -37,6 +37,14 @@ namespace d3d12
         ImGui_ImplDX12_Shutdown();
     }
 
+    void Imgui::Resize()
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        io.DisplaySize = ImVec2(
+            context->width,
+            context->height);
+    }
+
     void Imgui::Render()
     {
         ImGui_ImplDX12_NewFrame();
