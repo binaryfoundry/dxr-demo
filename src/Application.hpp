@@ -22,8 +22,6 @@ private:
 
     std::shared_ptr<IRenderer> renderer;
 
-    void ViewScale();
-    void SetupScene();
     bool GuiUpdate();
 
 public:
