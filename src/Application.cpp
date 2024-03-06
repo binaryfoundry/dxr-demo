@@ -71,17 +71,7 @@ bool Application::GuiUpdate()
 {
     ImGui::NewFrame();
 
-    ImGui::Begin(
-        "Menu",
-        NULL,
-        ImGuiWindowFlags_AlwaysAutoResize);
-
-    ImGui::Text(
-        "Application average %.3f ms/frame (%.1f FPS)",
-        fps_time_avg,
-        1000.0f / fps_time_avg);
-
-    ImGui::End();
+    ImGui::ShowDemoWindow();
 
     return false;
 }
