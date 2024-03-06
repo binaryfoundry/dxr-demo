@@ -201,16 +201,19 @@ namespace d3d12
             NUM_INSTANCES,
             &update_scratch_size);
 
-        auto desc = BASIC_BUFFER_DESC;
-        desc.Width = update_scratch_size;
-        desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-        context->device->CreateCommittedResource(
-            &DEFAULT_HEAP,
-            D3D12_HEAP_FLAG_NONE,
-            &desc,
-            D3D12_RESOURCE_STATE_COMMON,
-            nullptr,
-            IID_PPV_ARGS(&tlas_update_scratch));
+        for (size_t i = 0; i < FRAME_COUNT; i++)
+        {
+            auto desc = BASIC_BUFFER_DESC;
+            desc.Width = update_scratch_size;
+            desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+            context->device->CreateCommittedResource(
+                &DEFAULT_HEAP,
+                D3D12_HEAP_FLAG_NONE,
+                &desc,
+                D3D12_RESOURCE_STATE_COMMON,
+                nullptr,
+                IID_PPV_ARGS(&frame_resources[i].tlas_update_scratch));
+        }
     }
 
     void Raytracing::InitBottomLevel()
@@ -550,7 +553,7 @@ namespace d3d12
                 .InstanceDescs = instances->GetGPUVirtualAddress()
             },
             .SourceAccelerationStructureData = tlas->GetGPUVirtualAddress(),
-            .ScratchAccelerationStructureData = tlas_update_scratch->GetGPUVirtualAddress(),
+            .ScratchAccelerationStructureData = FrameResources().tlas_update_scratch->GetGPUVirtualAddress(),
         };
 
         context->command_list->BuildRaytracingAccelerationStructure(
