@@ -20,15 +20,15 @@ namespace d3d12
     {
         WaitForGpu();
 
-        for (UINT frame_id = 0; frame_id < FRAME_COUNT; frame_id++)
+        for (UINT i = 0; i < FRAME_COUNT; i++)
         {
-            auto& frame = context->frames[frame_id];
+            auto& frame = context->frames[i];
             frame.resources_to_release.clear();
             frame.handles_to_release.clear();
-            //frame.constant_buffer_pool_.pool_.clear();
-            //frame.constant_buffer_pool_backbuffer_.pool_.clear();
             frame.rtv_handle = DescriptorHandle();
         }
+
+        raytracing = nullptr;
 
         if (context->allocator)
         {
@@ -209,6 +209,8 @@ namespace d3d12
 
         cur_frame.resources_to_release.clear();
         cur_frame.handles_to_release.clear();
+
+        raytracing->MoveToNextFrame();
 
         ResetCommandList();
     }

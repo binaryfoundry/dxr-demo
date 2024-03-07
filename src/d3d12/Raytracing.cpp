@@ -1,7 +1,5 @@
 #include "Raytracing.hpp"
 
-#include <DirectXMath.h>
-
 #include "shaders/shader.fxh"
 
 namespace d3d12
@@ -47,6 +45,15 @@ namespace d3d12
 
     Raytracing::~Raytracing()
     {
+        for (UINT i = 0; i < FRAME_COUNT; i++)
+        {
+            frame_resources[i].constant_pool.pool.clear();
+        }
+    }
+
+    void Raytracing::MoveToNextFrame()
+    {
+        FrameResources().constant_pool.Reset();
     }
 
     void Raytracing::Initialize()
@@ -583,6 +590,22 @@ namespace d3d12
         context->command_list->SetComputeRootSignature(
             root_signature);
 
+        RaytracingUniforms uniforms;
+
+        DescriptorHandle* cbv0 = FrameResources().constant_pool.GetBuffer(
+            context.get(),
+            &uniforms);
+
+        D3D12_GPU_DESCRIPTOR_HANDLE table = context->gpu_descriptor_ring_buffer->StoreTableInit();
+
+        context->gpu_descriptor_ring_buffer->StoreTableCBV(
+            cbv0);
+
+        context->command_list->SetComputeRootDescriptorTable(
+            0,
+            table);
+
+        // TODO add to gpu_descriptor_ring_buffer table
         auto uav_heap2 = uav_heap.Get();
         context->command_list->SetDescriptorHeaps(1, &uav_heap2);
 

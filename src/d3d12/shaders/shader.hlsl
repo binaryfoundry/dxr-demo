@@ -5,6 +5,14 @@ struct Payload
     bool missed;
 };
 
+cbuffer Uniforms : register(b0)
+{
+    matrix Transform;
+    matrix Scale;
+    matrix Padding1;
+    matrix Padding2;
+};
+
 RaytracingAccelerationStructure scene : register(t0);
 
 RWTexture2D<float4> uav : register(u0);

@@ -4,26 +4,40 @@
 #include <memory>
 
 #include "Context.hpp"
+#include "Constants.hpp"
+
+#include <DirectXMath.h>
 
 namespace d3d12
 {
+    struct RaytracingUniforms
+    {
+        DirectX::XMMATRIX Transform;
+        DirectX::XMMATRIX Scale;
+        DirectX::XMMATRIX Padding1;
+        DirectX::XMMATRIX Padding2;
+    };
+
     class Raytracing
     {
     public:
         Raytracing(
             std::shared_ptr<d3d12::Context> context);
-        ~Raytracing();
+        virtual ~Raytracing();
 
         void Initialize();
 
         void Render();
         void Resize();
 
+        void MoveToNextFrame();
+
     private:
         std::shared_ptr<d3d12::Context> context;
 
         struct CurrentFrameResources
         {
+            ConstantBufferPool<RaytracingUniforms> constant_pool;
             ComPtr<ID3D12Resource> tlas_update_scratch;
         };
 

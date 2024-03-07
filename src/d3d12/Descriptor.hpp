@@ -99,8 +99,9 @@ class GPUDescriptorRingBuffer {
 public:
     GPUDescriptorRingBuffer(ID3D12Device* device);
 
-    D3D12_GPU_DESCRIPTOR_HANDLE StoreTable(
-        DescriptorHandle* cbv0, DescriptorHandle* srv0, DescriptorHandle* srv1, DescriptorHandle* srv2 = nullptr);
+    D3D12_GPU_DESCRIPTOR_HANDLE StoreTableInit();
+    void StoreTableCBV(DescriptorHandle* cbv);
+    void StoreTableSRV(DescriptorHandle* srv);
 
     ID3D12DescriptorHeap* descriptor_heap() const { return cbv_srv_uav_gpu_descriptor_heap_.Get(); }
 

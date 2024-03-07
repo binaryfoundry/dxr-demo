@@ -111,74 +111,44 @@ GPUDescriptorRingBuffer::GPUDescriptorRingBuffer(ID3D12Device* device) : device_
   current_gpu_handle_.InitOffsetted(cbv_srv_uav_gpu_descriptor_heap_->GetGPUDescriptorHandleForHeapStart(), 0);
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE GPUDescriptorRingBuffer::StoreTable(
-    DescriptorHandle* cbv0,
-    DescriptorHandle* srv0,
-    DescriptorHandle* srv1,
-    DescriptorHandle* srv2) {
-  if (remaining_handles_ < 4) {
-    current_cpu_handle_.InitOffsetted(cbv_srv_uav_gpu_descriptor_heap_->GetCPUDescriptorHandleForHeapStart(), 0);
-    current_gpu_handle_.InitOffsetted(cbv_srv_uav_gpu_descriptor_heap_->GetGPUDescriptorHandleForHeapStart(), 0);
-    remaining_handles_ = num_descriptors_ - 1;
-  }
+D3D12_GPU_DESCRIPTOR_HANDLE GPUDescriptorRingBuffer::StoreTableInit()
+{
+    if (remaining_handles_ < 4)
+    {
+        current_cpu_handle_.InitOffsetted(cbv_srv_uav_gpu_descriptor_heap_->GetCPUDescriptorHandleForHeapStart(), 0);
+        current_gpu_handle_.InitOffsetted(cbv_srv_uav_gpu_descriptor_heap_->GetGPUDescriptorHandleForHeapStart(), 0);
+        remaining_handles_ = num_descriptors_ - 1;
+    }
+    CD3DX12_GPU_DESCRIPTOR_HANDLE table_start = current_gpu_handle_;
 
-  device_->CopyDescriptorsSimple(1, current_cpu_handle_, cbv0->cpu_handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-  CD3DX12_GPU_DESCRIPTOR_HANDLE table_start = current_gpu_handle_;
+    return table_start;
+}
 
-  current_cpu_handle_.Offset(descriptor_size_);
-  current_gpu_handle_.Offset(descriptor_size_);
-  remaining_handles_--;
+void GPUDescriptorRingBuffer::StoreTableCBV(
+    DescriptorHandle* cbv)
+{
+    device_->CopyDescriptorsSimple(1, current_cpu_handle_, cbv->cpu_handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-  if (srv0) {
-    device_->CopyDescriptorsSimple(1, current_cpu_handle_, srv0->cpu_handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-  }
-  else {
-    // Create null SRV in-place
-    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
-    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MipLevels = 1;
-    device_->CreateShaderResourceView(nullptr, &srvDesc, current_cpu_handle_);
-  }
+    current_cpu_handle_.Offset(descriptor_size_);
+    current_gpu_handle_.Offset(descriptor_size_);
+    remaining_handles_--;
+}
 
-  current_cpu_handle_.Offset(descriptor_size_);
-  current_gpu_handle_.Offset(descriptor_size_);
-  remaining_handles_--;
-
-  if (srv1) {
-    device_->CopyDescriptorsSimple(1, current_cpu_handle_, srv1->cpu_handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-  }
-  else {
-    // Create null SRV in-place
-    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-    srvDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
-    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MipLevels = 1;
-    device_->CreateShaderResourceView(nullptr, &srvDesc, current_cpu_handle_);
-  }
-
-  current_cpu_handle_.Offset(descriptor_size_);
-  current_gpu_handle_.Offset(descriptor_size_);
-  remaining_handles_--;
-
-  if (srv2) {
-      device_->CopyDescriptorsSimple(1, current_cpu_handle_, srv2->cpu_handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-  }
-  else {
-      // Create null SRV in-place
-      D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-      srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-      srvDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
-      srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-      srvDesc.Texture2D.MipLevels = 1;
-      device_->CreateShaderResourceView(nullptr, &srvDesc, current_cpu_handle_);
-  }
-
-  current_cpu_handle_.Offset(descriptor_size_);
-  current_gpu_handle_.Offset(descriptor_size_);
-  remaining_handles_--;
-
-  return table_start;
+void GPUDescriptorRingBuffer::StoreTableSRV(
+    DescriptorHandle* srv)
+{
+    if (srv)
+    {
+        device_->CopyDescriptorsSimple(1, current_cpu_handle_, srv->cpu_handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    }
+    else
+    {
+        // Create null SRV in-place
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = 1;
+        device_->CreateShaderResourceView(nullptr, &srvDesc, current_cpu_handle_);
+    }
 }
