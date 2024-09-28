@@ -102,6 +102,18 @@ set(HEADERS_D3D12
     src/d3d12/Raytracing.hpp
     src/d3d12/Imgui.hpp)
 
+set(SOURCES_D3D12_RAYTRACING
+    src/d3d12/raytracing/Scene.cpp
+    src/d3d12/raytracing/Allocation.cpp
+    src/d3d12/raytracing/TopStructure.cpp
+    src/d3d12/raytracing/BottomStructure.cpp)
+
+set(HEADERS_D3D12_RAYTRACING
+    src/d3d12/raytracing/Scene.hpp
+    src/d3d12/raytracing/Allocation.hpp
+    src/d3d12/raytracing/TopStructure.hpp
+    src/d3d12/raytracing/BottomStructure.hpp)
+
 set(SOURCES_D3D12_SHADERS
     ${PROJECT_SOURCE_DIR}/src/d3d12/shaders/shader.hlsl)
 
@@ -125,6 +137,9 @@ SOURCE_GROUP("Source\\imgui" FILES ${HEADERS_IMGUI})
 
 SOURCE_GROUP("Source\\d3d12" FILES ${SOURCES_D3D12})
 SOURCE_GROUP("Source\\d3d12" FILES ${HEADERS_D3D12})
+
+SOURCE_GROUP("Source\\d3d12\\raytracing" FILES ${SOURCES_D3D12_RAYTRACING})
+SOURCE_GROUP("Source\\d3d12\\raytracing" FILES ${HEADERS_D3D12_RAYTRACING})
 
 SOURCE_GROUP("Source\\d3d12\\shaders" FILES ${SOURCES_D3D12_SHADERS})
 
@@ -167,6 +182,8 @@ add_executable(
     ${HEADERS_IMGUI}
     ${SOURCES_D3D12}
     ${HEADERS_D3D12}
+    ${SOURCES_D3D12_RAYTRACING}
+    ${HEADERS_D3D12_RAYTRACING}
     ${SOURCES_D3D12_SHADERS})
 
 add_custom_target(

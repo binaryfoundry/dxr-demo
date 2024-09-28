@@ -30,6 +30,17 @@ namespace d3d12
         .Quality = 0
     };
 
+    constexpr D3D12_RESOURCE_DESC BASIC_BUFFER_DESC =
+    {
+        .Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
+        .Width = 0, // Will be changed in copies
+        .Height = 1,
+        .DepthOrArraySize = 1,
+        .MipLevels = 1,
+        .SampleDesc = NO_AA,
+        .Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR
+    };
+
     struct Context
     {
         size_t frame_index = 0;
