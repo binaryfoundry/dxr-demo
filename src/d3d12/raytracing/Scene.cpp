@@ -112,6 +112,7 @@ namespace raytracing
             blas_init_list.clear();
         }
 
+        // TODO only need one TLAS
         if (!tlas_init_list.empty())
         {
             for (const auto& tlas : tlas_init_list)

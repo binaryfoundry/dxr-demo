@@ -17,6 +17,7 @@ namespace d3d12
     static const UINT RENDERER_FRAME_COUNT = 3;
     static const UINT FRAME_COUNT = RENDERER_FRAME_COUNT;
 
+    // Make class with private
     struct Frame
     {
         ComPtr<ID3D12CommandAllocator> command_allocator;
