@@ -2,6 +2,8 @@
 
 #include "../Context.hpp"
 #include "../Constants.hpp"
+#include "../Allocator.hpp"
+
 #include "BottomStructure.hpp"
 
 #include <vector>
@@ -42,7 +44,7 @@ namespace raytracing
         ComPtr<ID3D12Resource> instances;
         D3D12_RAYTRACING_INSTANCE_DESC* instance_data = nullptr;
 
-        ID3D12Resource* tlas = nullptr;
+        D3D12MA::ResourcePtr tlas;
 
         void UpdateTransforms();
 

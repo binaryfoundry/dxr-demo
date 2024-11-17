@@ -48,13 +48,13 @@ namespace raytracing
 
     void BottomStructure::Initialize()
     {
-        blas = MakeAccelerationStructure(
-            context, context->command_list.Get(), inputs);
+        MakeAccelerationStructure(
+            context, context->command_list.Get(), inputs, blas);
     }
 
     D3D12_GPU_VIRTUAL_ADDRESS BottomStructure::GetGPUVirtualAddress()
     {
-        return blas->GetGPUVirtualAddress();
+        return blas->GetResource()->GetGPUVirtualAddress();
     }
 }
 }

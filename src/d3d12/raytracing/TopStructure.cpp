@@ -58,10 +58,11 @@ namespace raytracing
 
         UINT64 update_scratch_size = 0;
 
-        tlas = MakeAccelerationStructure(
+        MakeAccelerationStructure(
             context,
             context->command_list.Get(),
             inputs,
+            tlas,
             &update_scratch_size);
 
         for (size_t i = 0; i < FRAME_COUNT; i++)
@@ -85,7 +86,7 @@ namespace raytracing
 
         const D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC desc =
         {
-            .DestAccelerationStructureData = tlas->GetGPUVirtualAddress(),
+            .DestAccelerationStructureData = tlas->GetResource()->GetGPUVirtualAddress(),
             .Inputs =
             {
                 .Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL,
@@ -94,7 +95,7 @@ namespace raytracing
                 .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY,
                 .InstanceDescs = instances->GetGPUVirtualAddress()
             },
-            .SourceAccelerationStructureData = tlas->GetGPUVirtualAddress(),
+            .SourceAccelerationStructureData = tlas->GetResource()->GetGPUVirtualAddress(),
             .ScratchAccelerationStructureData = FrameResources().tlas_update_scratch->GetGPUVirtualAddress(),
         };
 
@@ -108,7 +109,7 @@ namespace raytracing
             .Type = D3D12_RESOURCE_BARRIER_TYPE_UAV,
             .UAV =
             {
-                .pResource = tlas
+                .pResource = tlas->GetResource()
             }
         };
 
@@ -174,7 +175,7 @@ namespace raytracing
 
         context->command_list->SetComputeRootShaderResourceView(
             1,
-            tlas->GetGPUVirtualAddress());
+            tlas->GetResource()->GetGPUVirtualAddress());
 
         context->command_list->DispatchRays(&dispatch_desc);
     }
@@ -186,7 +187,7 @@ namespace raytracing
 
     D3D12_GPU_VIRTUAL_ADDRESS TopStructure::GetGPUVirtualAddress()
     {
-        return tlas->GetGPUVirtualAddress();
+        return tlas->GetResource()->GetGPUVirtualAddress();
     }
 }
 }

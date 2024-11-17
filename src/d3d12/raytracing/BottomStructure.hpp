@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Context.hpp"
+#include "../Allocator.hpp"
 
 namespace d3d12
 {
@@ -11,7 +12,7 @@ namespace raytracing
     private:
         std::shared_ptr<d3d12::Context> context;
 
-        ID3D12Resource* blas = nullptr;
+        D3D12MA::ResourcePtr blas;
         D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS inputs;
         D3D12_RAYTRACING_GEOMETRY_DESC geometry_desc;
 
