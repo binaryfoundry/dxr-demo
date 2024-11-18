@@ -22,6 +22,11 @@ namespace raytracing
         }
     }
 
+    CurrentFrameResources& TopStructure::FrameResources()
+    {
+        return frame_resources[context->frame_index];
+    }
+
     void TopStructure::Initialize()
     {
         auto instances_desc = BASIC_BUFFER_DESC;

@@ -33,12 +33,8 @@ namespace raytracing
     private:
         std::shared_ptr<d3d12::Context> context;
 
+        CurrentFrameResources& FrameResources();
         std::array<CurrentFrameResources, FRAME_COUNT> frame_resources;
-
-        CurrentFrameResources& FrameResources()
-        {
-            return frame_resources[context->frame_index];
-        }
 
         std::vector<std::shared_ptr<BottomStructure>> instance_list;
         ComPtr<ID3D12Resource> instances;
