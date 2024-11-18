@@ -27,7 +27,7 @@ namespace d3d12
             frame.rtv_handle = DescriptorHandle();
         }
 
-        raytracing = nullptr;
+        scene = nullptr;
 
         if (context->allocator)
         {
@@ -117,8 +117,8 @@ namespace d3d12
 
         imgui = std::make_unique<d3d12::Imgui>(context);
 
-        raytracing = std::make_unique<d3d12::Raytracing>(context);
-        raytracing->Initialize();
+        scene = std::make_unique<d3d12::Scene>(context);
+        scene->Initialize();
 
         context->CurrentFrame().fence_value++;
 
@@ -208,7 +208,7 @@ namespace d3d12
 
         cur_frame.ReleaseFrameComplete();
 
-        raytracing->MoveToNextFrame();
+        scene->MoveToNextFrame();
 
         ResetCommandList();
     }
@@ -325,7 +325,7 @@ namespace d3d12
             cmds_lists.size(),
             cmds_lists.data());
 
-        raytracing->Resize();
+        scene->Resize();
         imgui->Resize();
     }
 
@@ -372,7 +372,7 @@ namespace d3d12
         context->command_list->RSSetScissorRects(
             1, &scissor_rect);
 
-        raytracing->Render();
+        scene->Render();
         imgui->Render();
 
         auto barrier_1 = CD3DX12_RESOURCE_BARRIER::Transition(

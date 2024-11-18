@@ -6,7 +6,7 @@
 #include "Frame.hpp"
 #include "Context.hpp"
 #include "Imgui.hpp"
-#include "Raytracing.hpp"
+#include "Scene.hpp"
 #include "../interfaces/IRenderer.hpp"
 
 namespace d3d12
@@ -27,7 +27,7 @@ namespace d3d12
 
         std::shared_ptr<d3d12::Context> context;
         std::unique_ptr<d3d12::Imgui> imgui;
-        std::unique_ptr<d3d12::Raytracing> raytracing;
+        std::unique_ptr<d3d12::Scene> scene;
 
         void ResizeSwapChain();
 

@@ -89,7 +89,7 @@ set(SOURCES_D3D12
     src/d3d12/Context.cpp
     src/d3d12/Descriptor.cpp
     src/d3d12/Frame.cpp
-    src/d3d12/Raytracing.cpp
+    src/d3d12/Scene.cpp
     src/d3d12/Imgui.cpp)
 
 set(HEADERS_D3D12
@@ -99,17 +99,15 @@ set(HEADERS_D3D12
     src/d3d12/Context.hpp
     src/d3d12/Descriptor.hpp
     src/d3d12/Frame.hpp
-    src/d3d12/Raytracing.hpp
+    src/d3d12/Scene.hpp
     src/d3d12/Imgui.hpp)
 
 set(SOURCES_D3D12_RAYTRACING
-    src/d3d12/raytracing/Scene.cpp
     src/d3d12/raytracing/Allocation.cpp
     src/d3d12/raytracing/TopStructure.cpp
     src/d3d12/raytracing/BottomStructure.cpp)
 
 set(HEADERS_D3D12_RAYTRACING
-    src/d3d12/raytracing/Scene.hpp
     src/d3d12/raytracing/Allocation.hpp
     src/d3d12/raytracing/TopStructure.hpp
     src/d3d12/raytracing/BottomStructure.hpp)

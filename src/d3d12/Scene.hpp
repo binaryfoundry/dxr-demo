@@ -5,16 +5,17 @@
 
 #include "Context.hpp"
 
-#include "raytracing/Scene.hpp"
+#include "raytracing/TopStructure.hpp"
+#include "raytracing/BottomStructure.hpp"
 
 namespace d3d12
 {
-    class Raytracing
+    class Scene
     {
     public:
-        Raytracing(
+        Scene(
             std::shared_ptr<d3d12::Context> context);
-        virtual ~Raytracing() = default;
+        virtual ~Scene() = default;
 
         void Initialize();
 
@@ -26,8 +27,6 @@ namespace d3d12
     private:
         std::shared_ptr<d3d12::Context> context;
 
-        std::unique_ptr<raytracing::Scene> scene;
-
         ComPtr<ID3D12DescriptorHeap> uav_heap;
         ComPtr<ID3D12Resource> render_target;
 
@@ -37,6 +36,20 @@ namespace d3d12
 
         void InitRootSignature();
         void InitPipeline();
+
+        ID3D12Resource* quad_vb = nullptr;
+        ID3D12Resource* cube_vb = nullptr;
+        ID3D12Resource* cube_ib = nullptr;
+
+        std::shared_ptr<raytracing::TopStructure> tlas;
+
+        std::shared_ptr<raytracing::BottomStructure> cube_blas;
+        std::shared_ptr<raytracing::BottomStructure> quad_blas;
+
+        std::vector<std::shared_ptr<raytracing::BottomStructure>> blas_init_list;
+
+        void InitMeshes();
+        void InitAccelerationStructure();
 
         void Flush();
     };
