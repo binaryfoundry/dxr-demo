@@ -23,8 +23,7 @@ namespace d3d12
         for (UINT i = 0; i < FRAME_COUNT; i++)
         {
             auto& frame = context->frames[i];
-            frame.resources_to_release.clear();
-            frame.handles_to_release.clear();
+            frame.ReleaseFrameComplete();
             frame.rtv_handle = DescriptorHandle();
         }
 
@@ -207,8 +206,7 @@ namespace d3d12
 
         cur_frame.fence_value = current_fence_value + 1;
 
-        cur_frame.resources_to_release.clear();
-        cur_frame.handles_to_release.clear();
+        cur_frame.ReleaseFrameComplete();
 
         raytracing->MoveToNextFrame();
 
