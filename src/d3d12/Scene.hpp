@@ -28,18 +28,18 @@ namespace d3d12
         std::shared_ptr<d3d12::Context> context;
 
         ComPtr<ID3D12DescriptorHeap> uav_heap;
-        ComPtr<ID3D12Resource> render_target;
+        D3D12MA::ResourcePtr render_target;
 
         ID3D12RootSignature* root_signature = nullptr;
         ID3D12StateObject* pso = nullptr;
-        ID3D12Resource* shader_ids = nullptr;
+        D3D12MA::ResourcePtr shader_ids = nullptr;
 
         void InitRootSignature();
         void InitPipeline();
 
-        ID3D12Resource* quad_vb = nullptr;
-        ID3D12Resource* cube_vb = nullptr;
-        ID3D12Resource* cube_ib = nullptr;
+        D3D12MA::ResourcePtr quad_vb = nullptr;
+        D3D12MA::ResourcePtr cube_vb = nullptr;
+        D3D12MA::ResourcePtr cube_ib = nullptr;
 
         std::shared_ptr<raytracing::TopStructure> tlas;
 

@@ -13,17 +13,17 @@ namespace raytracing
     {
         auto make_buffer = [&](UINT64 size, auto initial_state, D3D12MA::ResourcePtr& res)
         {
-            auto resourceDesc = BASIC_BUFFER_DESC;
-            resourceDesc.Width = size;
-            resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+            auto resource_desc = BASIC_BUFFER_DESC;
+            resource_desc.Width = size;
+            resource_desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
-            D3D12MA::ALLOCATION_DESC allocationDesc = {};
-            allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
+            D3D12MA::ALLOCATION_DESC allocation_desc = {};
+            allocation_desc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
 
             D3D12MA::Allocation* alloc = nullptr;
             context->allocator->CreateResource(
-                &allocationDesc,
-                &resourceDesc,
+                &allocation_desc,
+                &resource_desc,
                 initial_state,
                 NULL,
                 &alloc,

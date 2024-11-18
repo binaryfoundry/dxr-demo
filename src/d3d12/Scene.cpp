@@ -51,42 +51,48 @@ namespace d3d12
 
     void Scene::InitMeshes()
     {
-        auto make_and_copy = [&](auto& data) {
+        auto make_and_copy = [&](auto& data, D3D12MA::ResourcePtr& res) {
             auto desc = BASIC_BUFFER_DESC;
             desc.Width = sizeof(data);
-            ID3D12Resource* res;
-            context->device->CreateCommittedResource(
-                &UPLOAD_HEAP,
-                D3D12_HEAP_FLAG_NONE,
+
+            D3D12MA::ALLOCATION_DESC allocation_desc = {};
+            allocation_desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+
+            D3D12MA::Allocation* alloc = nullptr;
+            context->allocator->CreateResource(
+                &allocation_desc,
                 &desc,
                 D3D12_RESOURCE_STATE_COMMON,
-                nullptr,
-                IID_PPV_ARGS(&res));
+                NULL,
+                &alloc,
+                __uuidof(ID3D12Resource),
+                nullptr);
+
+            res.reset(alloc);
 
             void* ptr;
-            res->Map(0, nullptr, &ptr);
+            res->GetResource()->Map(0, nullptr, &ptr);
             memcpy(ptr, data, sizeof(data));
-            res->Unmap(0, nullptr);
-            return res;
-            };
+            res->GetResource()->Unmap(0, nullptr);
+        };
 
-        quad_vb = make_and_copy(quad_vtx);
-        cube_vb = make_and_copy(cube_vtx);
-        cube_ib = make_and_copy(cube_idx);
+        make_and_copy(quad_vtx, quad_vb);
+        make_and_copy(cube_vtx, cube_vb);
+        make_and_copy(cube_idx, cube_ib);
     }
 
     void Scene::InitAccelerationStructure()
     {
         quad_blas = std::make_shared<raytracing::BottomStructure>(
             context,
-            quad_vb,
+            quad_vb->GetResource(),
             std::size(quad_vtx));
 
         cube_blas = std::make_shared<raytracing::BottomStructure>(
             context,
-            cube_vb,
+            cube_vb->GetResource(),
             std::size(cube_vtx),
-            cube_ib,
+            cube_ib->GetResource(),
             std::size(cube_idx));
 
         blas_init_list.push_back(quad_blas);
@@ -221,13 +227,21 @@ namespace d3d12
 
         auto id_desc = BASIC_BUFFER_DESC;
         id_desc.Width = NUM_SHADER_IDS * D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
-        context->device->CreateCommittedResource(
-            &UPLOAD_HEAP,
-            D3D12_HEAP_FLAG_NONE,
+
+        D3D12MA::ALLOCATION_DESC allocation_desc = {};
+        allocation_desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+
+        D3D12MA::Allocation* shader_ids_alloc = nullptr;
+        context->allocator->CreateResource(
+            &allocation_desc,
             &id_desc,
             D3D12_RESOURCE_STATE_COMMON,
-            nullptr,
-            IID_PPV_ARGS(&shader_ids));
+            NULL,
+            &shader_ids_alloc,
+            __uuidof(ID3D12Resource),
+            nullptr);
+
+        shader_ids.reset(shader_ids_alloc);
 
         ID3D12StateObjectProperties* props;
         pso->QueryInterface(&props);
@@ -241,11 +255,11 @@ namespace d3d12
                 D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
         };
 
-        shader_ids->Map(0, nullptr, &data);
+        shader_ids->GetResource()->Map(0, nullptr, &data);
         write_id(L"RayGeneration");
         write_id(L"Miss");
         write_id(L"HitGroup");
-        shader_ids->Unmap(0, nullptr);
+        shader_ids->GetResource()->Unmap(0, nullptr);
 
         props->Release();
     }
@@ -281,12 +295,10 @@ namespace d3d12
 
         uav_heap = new_uav_heap;
 
-        if (render_target.Get()) [[likely]]
+        if (render_target) [[likely]]
         {
-            render_target.Get()->Release();
+            context->CurrentFrame().ReleaseWhenFrameComplete(std::move(render_target));
         }
-
-        ID3D12Resource* new_render_target;
 
         D3D12_RESOURCE_DESC rt_desc =
         {
@@ -300,13 +312,18 @@ namespace d3d12
             .Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
         };
 
-        context->device->CreateCommittedResource(
-            &DEFAULT_HEAP,
-            D3D12_HEAP_FLAG_NONE,
+        D3D12MA::ALLOCATION_DESC allocation_desc = {};
+        allocation_desc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
+
+        D3D12MA::Allocation* rt_alloc = nullptr;
+        context->allocator->CreateResource(
+            &allocation_desc,
             &rt_desc,
             D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-            nullptr,
-            IID_PPV_ARGS(&new_render_target));
+            NULL,
+            &rt_alloc,
+            __uuidof(ID3D12Resource),
+            nullptr);
 
         D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc =
         {
@@ -315,12 +332,12 @@ namespace d3d12
         };
 
         context->device->CreateUnorderedAccessView(
-            new_render_target,
+            rt_alloc->GetResource(),
             nullptr,
             &uav_desc,
             uav_heap->GetCPUDescriptorHandleForHeapStart());
 
-        render_target = new_render_target;
+        render_target.reset(rt_alloc);
     }
 
     void Scene::Render()
@@ -337,18 +354,18 @@ namespace d3d12
         {
             .RayGenerationShaderRecord =
             {
-                .StartAddress = shader_ids->GetGPUVirtualAddress(),
+                .StartAddress = shader_ids->GetResource()->GetGPUVirtualAddress(),
                 .SizeInBytes = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES
             },
             .MissShaderTable =
             {
-                .StartAddress = shader_ids->GetGPUVirtualAddress() +
+                .StartAddress = shader_ids->GetResource()->GetGPUVirtualAddress() +
                                 D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT,
                 .SizeInBytes = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES
             },
             .HitGroupTable =
             {
-                .StartAddress = shader_ids->GetGPUVirtualAddress() +
+                .StartAddress = shader_ids->GetResource()->GetGPUVirtualAddress() +
                                 2 * D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT,
                 .SizeInBytes = D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES
             },
@@ -402,7 +419,7 @@ namespace d3d12
         };
 
         barrier(
-            render_target.Get(),
+            render_target->GetResource(),
             D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
             D3D12_RESOURCE_STATE_COPY_SOURCE);
 
@@ -413,7 +430,7 @@ namespace d3d12
 
         context->command_list->CopyResource(
             back_buffer,
-            render_target.Get());
+            render_target->GetResource());
 
         barrier(
             back_buffer,
@@ -421,7 +438,7 @@ namespace d3d12
             D3D12_RESOURCE_STATE_RENDER_TARGET);
 
         barrier(
-            render_target.Get(),
+            render_target->GetResource(),
             D3D12_RESOURCE_STATE_COPY_SOURCE,
             D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 

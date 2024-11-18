@@ -25,7 +25,7 @@ namespace raytracing
     struct CurrentFrameResources
     {
         ConstantBufferPool<InstanceUniforms> constant_pool;
-        ComPtr<ID3D12Resource> tlas_update_scratch;
+        D3D12MA::ResourcePtr tlas_update_scratch;
     };
 
     class TopStructure
@@ -37,7 +37,7 @@ namespace raytracing
         std::array<CurrentFrameResources, FRAME_COUNT> frame_resources;
 
         std::vector<std::shared_ptr<BottomStructure>> instance_list;
-        ComPtr<ID3D12Resource> instances;
+        D3D12MA::ResourcePtr instances;
         D3D12_RAYTRACING_INSTANCE_DESC* instance_data = nullptr;
 
         D3D12MA::ResourcePtr tlas;

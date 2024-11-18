@@ -31,15 +31,22 @@ namespace raytracing
     {
         auto instances_desc = BASIC_BUFFER_DESC;
         instances_desc.Width = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * instance_list.size();
-        context->device->CreateCommittedResource(
-            &UPLOAD_HEAP,
-            D3D12_HEAP_FLAG_NONE,
+
+        D3D12MA::ALLOCATION_DESC allocation_desc = {};
+        allocation_desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+
+        D3D12MA::Allocation* instances_alloc = nullptr;
+        context->allocator->CreateResource(
+            &allocation_desc,
             &instances_desc,
             D3D12_RESOURCE_STATE_COMMON,
-            nullptr,
-            IID_PPV_ARGS(&instances));
+            NULL,
+            &instances_alloc,
+            __uuidof(ID3D12Resource),
+            nullptr);
+        instances.reset(instances_alloc);
 
-        instances->Map(0, nullptr, reinterpret_cast<void**>(
+        instances->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(
             &instance_data));
 
         for (UINT i = 0; i < instance_list.size(); ++i)
@@ -58,7 +65,7 @@ namespace raytracing
             .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE,
             .NumDescs = static_cast<UINT>(instance_list.size()),
             .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY,
-            .InstanceDescs = instances->GetGPUVirtualAddress()
+            .InstanceDescs = instances->GetResource()->GetGPUVirtualAddress()
         };
 
         UINT64 update_scratch_size = 0;
@@ -75,13 +82,20 @@ namespace raytracing
             auto desc = BASIC_BUFFER_DESC;
             desc.Width = update_scratch_size;
             desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-            context->device->CreateCommittedResource(
-                &DEFAULT_HEAP,
-                D3D12_HEAP_FLAG_NONE,
+
+            D3D12MA::ALLOCATION_DESC allocation_desc = {};
+            allocation_desc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
+
+            D3D12MA::Allocation* scratch_alloc = nullptr;
+            context->allocator->CreateResource(
+                &allocation_desc,
                 &desc,
                 D3D12_RESOURCE_STATE_COMMON,
-                nullptr,
-                IID_PPV_ARGS(&frame_resources[i].tlas_update_scratch));
+                NULL,
+                &scratch_alloc,
+                __uuidof(ID3D12Resource),
+                nullptr);
+            frame_resources[i].tlas_update_scratch.reset(scratch_alloc);
         }
 
         D3D12_RESOURCE_BARRIER uavBarrier = {};
@@ -112,10 +126,10 @@ namespace raytracing
                 .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE,
                 .NumDescs = static_cast<UINT>(instance_list.size()),
                 .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY,
-                .InstanceDescs = instances->GetGPUVirtualAddress()
+                .InstanceDescs = instances->GetResource()->GetGPUVirtualAddress()
             },
             .SourceAccelerationStructureData = tlas->GetResource()->GetGPUVirtualAddress(),
-            .ScratchAccelerationStructureData = FrameResources().tlas_update_scratch->GetGPUVirtualAddress(),
+            .ScratchAccelerationStructureData = FrameResources().tlas_update_scratch->GetResource()->GetGPUVirtualAddress(),
         };
 
         context->command_list->BuildRaytracingAccelerationStructure(
