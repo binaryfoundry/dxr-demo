@@ -18,7 +18,6 @@ namespace raytracing
         ID3D12Resource* cube_vb = nullptr;
         ID3D12Resource* cube_ib = nullptr;
 
-        std::vector<std::shared_ptr<TopStructure>> tlas_init_list;
         std::vector<std::shared_ptr<BottomStructure>> blas_init_list;
 
         std::shared_ptr<raytracing::TopStructure> tlas;

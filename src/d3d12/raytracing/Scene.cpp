@@ -88,8 +88,6 @@ namespace raytracing
 
         tlas = std::make_shared<TopStructure>(
             context, instance_list);
-
-        tlas_init_list.push_back(tlas);
     }
 
     void Scene::Update()
@@ -110,19 +108,6 @@ namespace raytracing
             context->command_list->ResourceBarrier(1, &uavBarrier);
 
             blas_init_list.clear();
-        }
-
-        // TODO only need one TLAS
-        if (!tlas_init_list.empty())
-        {
-            for (const auto& tlas : tlas_init_list)
-            {
-                tlas->Initialize();
-            }
-
-            context->command_list->ResourceBarrier(1, &uavBarrier);
-
-            tlas_init_list.clear();
         }
 
         tlas->Update();

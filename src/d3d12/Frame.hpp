@@ -14,8 +14,8 @@ using Microsoft::WRL::ComPtr;
 
 namespace d3d12
 {
-    static const UINT RENDERER_FRAME_COUNT = 3;
-    static const UINT FRAME_COUNT = RENDERER_FRAME_COUNT;
+    static constexpr UINT RENDERER_FRAME_COUNT = 3;
+    static constexpr UINT FRAME_COUNT = RENDERER_FRAME_COUNT;
 
     class Frame
     {

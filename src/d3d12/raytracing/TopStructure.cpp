@@ -78,10 +78,24 @@ namespace raytracing
                 nullptr,
                 IID_PPV_ARGS(&frame_resources[i].tlas_update_scratch));
         }
+
+        D3D12_RESOURCE_BARRIER uavBarrier = {};
+        uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+        uavBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        uavBarrier.UAV.pResource = nullptr; // Applies to all UAV writes
+
+        context->command_list->ResourceBarrier(1, &uavBarrier);
+
+        initialized = true;
     }
 
     void TopStructure::Update()
     {
+        if (!initialized)
+        {
+            Initialize();
+        }
+
         UpdateTransforms();
 
         const D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC desc =
