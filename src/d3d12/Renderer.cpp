@@ -322,7 +322,7 @@ namespace d3d12
         };
 
         context->command_queue->ExecuteCommandLists(
-            cmds_lists.size(),
+            static_cast<UINT>(cmds_lists.size()),
             cmds_lists.data());
 
         scene->Resize();

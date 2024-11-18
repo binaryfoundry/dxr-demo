@@ -41,8 +41,8 @@ namespace d3d12
     {
         ImGuiIO& io = ImGui::GetIO();
         io.DisplaySize = ImVec2(
-            context->width,
-            context->height);
+            static_cast<float>(context->width),
+            static_cast<float>(context->height));
     }
 
     void Imgui::Render()
