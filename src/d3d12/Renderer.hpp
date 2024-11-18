@@ -17,8 +17,8 @@ namespace d3d12
         Renderer(HWND hwnd);
         virtual ~Renderer();
 
-        void Initialize(uint32_t width, uint32_t height);
-        void SetSize(uint32_t width, uint32_t height);
+        void Initialize(const uint32_t width, const uint32_t height);
+        void SetSize(const uint32_t width, const uint32_t height);
         void Render();
         void Destroy();
 

@@ -36,7 +36,7 @@ namespace d3d12
         }
     }
 
-    void Renderer::Initialize(uint32_t w, uint32_t h)
+    void Renderer::Initialize(const uint32_t w, const uint32_t h)
     {
         context->width = w;
         context->height = h;
@@ -149,7 +149,7 @@ namespace d3d12
     {
     }
 
-    void Renderer::SetSize(uint32_t w, uint32_t h)
+    void Renderer::SetSize(const uint32_t w, const uint32_t h)
     {
         context->width = w;
         context->height = h;
