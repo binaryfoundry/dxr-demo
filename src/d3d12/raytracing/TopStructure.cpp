@@ -163,7 +163,7 @@ namespace raytracing
         ComPtr<ID3D12DescriptorHeap>& uav_heap,
         const D3D12_DISPATCH_RAYS_DESC& dispatch_desc)
     {
-        RaytracingUniforms uniforms;
+        InstanceUniforms uniforms;
 
         DescriptorHandle* cbv0 = FrameResources().constant_pool.GetBuffer(
             context.get(),

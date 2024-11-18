@@ -14,7 +14,7 @@ namespace d3d12
 {
 namespace raytracing
 {
-    struct RaytracingUniforms
+    struct InstanceUniforms
     {
         DirectX::XMMATRIX Transform;
         DirectX::XMMATRIX Scale;
@@ -24,7 +24,7 @@ namespace raytracing
 
     struct CurrentFrameResources
     {
-        ConstantBufferPool<RaytracingUniforms> constant_pool;
+        ConstantBufferPool<InstanceUniforms> constant_pool;
         ComPtr<ID3D12Resource> tlas_update_scratch;
     };
 
