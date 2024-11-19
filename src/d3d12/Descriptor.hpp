@@ -92,25 +92,3 @@ protected:
     std::unique_ptr<DescriptorPool> pool_by_type_[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 };
 
-//
-// Fixed-size ring buffer for passing descriptors to GPU.
-//
-class GPUDescriptorRingBuffer {
-public:
-    GPUDescriptorRingBuffer(ID3D12Device* device);
-
-    D3D12_GPU_DESCRIPTOR_HANDLE StoreTableInit();
-    void StoreTableCBV(DescriptorHandle* cbv);
-    void StoreTableSRV(DescriptorHandle* srv);
-
-    ID3D12DescriptorHeap* descriptor_heap() const { return cbv_srv_uav_gpu_descriptor_heap_.Get(); }
-
-protected:
-    ID3D12Device* device_;
-    static const uint32_t num_descriptors_ = 16384 * 4;
-    Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> cbv_srv_uav_gpu_descriptor_heap_;
-    CD3DX12_CPU_DESCRIPTOR_HANDLE current_cpu_handle_;
-    CD3DX12_GPU_DESCRIPTOR_HANDLE current_gpu_handle_;
-    INT descriptor_size_ = 0;
-    size_t remaining_handles_ = 0;
-};

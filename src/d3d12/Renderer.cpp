@@ -62,9 +62,6 @@ namespace d3d12
         context->descriptor_allocator.reset(
             new DescriptorAllocator(context->device.Get()));
 
-        context->gpu_descriptor_ring_buffer.reset(
-            new GPUDescriptorRingBuffer(context->device.Get()));
-
         D3D12_COMMAND_QUEUE_DESC cmd_queue_desc =
         {
             .Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
@@ -218,15 +215,6 @@ namespace d3d12
         context->command_list->Reset(
             context->CurrentFrame().command_allocator.Get(),
             nullptr);
-
-        ID3D12DescriptorHeap* pp_heaps[] =
-        {
-            context->gpu_descriptor_ring_buffer->descriptor_heap()
-        };
-
-        context->command_list->SetDescriptorHeaps(
-            _countof(pp_heaps),
-            pp_heaps);
     }
 
     void Renderer::WaitForGpu()
