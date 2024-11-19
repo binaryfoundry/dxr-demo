@@ -24,6 +24,7 @@ namespace raytracing
     struct CurrentFrameResources
     {
         D3D12MA::ResourcePtr tlas_update_scratch;
+        D3D12MA::ResourcePtr constants;
     };
 
     class TopStructure

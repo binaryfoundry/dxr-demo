@@ -21,6 +21,28 @@ namespace raytracing
 
     void TopStructure::Initialize()
     {
+        // TODO move internal to FrameResources
+        for (size_t i = 0; i < FRAME_COUNT; i++)
+        {
+            auto resource_desc = BASIC_BUFFER_DESC;
+            resource_desc.Width = sizeof(InstanceUniforms);
+
+            D3D12MA::ALLOCATION_DESC allocation_desc = {};
+            allocation_desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
+
+            D3D12MA::Allocation* cbv_alloc = nullptr;
+            context->allocator->CreateResource(
+                &allocation_desc,
+                &resource_desc,
+                D3D12_RESOURCE_STATE_COMMON,
+                NULL,
+                &cbv_alloc,
+                __uuidof(ID3D12Resource),
+                nullptr);
+
+            frame_resources[i].constants.reset(cbv_alloc);
+        }
+
         auto instances_desc = BASIC_BUFFER_DESC;
         instances_desc.Width = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * instance_list.size();
 
@@ -184,34 +206,16 @@ namespace raytracing
             translation,
             XMMatrixTranslation(0.0f, 0.01f, 0.0f));
 
-        auto resource_desc = BASIC_BUFFER_DESC;
-        resource_desc.Width = sizeof(InstanceUniforms);
-
-        D3D12MA::ALLOCATION_DESC allocation_desc = {};
-        allocation_desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
-
-        D3D12MA::Allocation* cbv0_alloc = nullptr;
-        context->allocator->CreateResource(
-            &allocation_desc,
-            &resource_desc,
-            D3D12_RESOURCE_STATE_COMMON,
-            NULL,
-            &cbv0_alloc,
-            __uuidof(ID3D12Resource),
-            nullptr);
-
-        D3D12MA::ResourcePtr cbv0_resource(cbv0_alloc);
+        D3D12MA::ResourcePtr& cvb0 = FrameResources().constants;
 
         void* ptr;
-        cbv0_resource->GetResource()->Map(0, nullptr, &ptr);
+        cvb0->GetResource()->Map(0, nullptr, &ptr);
         memcpy(ptr, &uniforms, sizeof(uniforms));
-        cbv0_resource->GetResource()->Unmap(0, nullptr);
+        cvb0->GetResource()->Unmap(0, nullptr);
 
         context->command_list->SetComputeRootConstantBufferView(
             0,
-            cbv0_resource->GetResource()->GetGPUVirtualAddress());
-
-        context->CurrentFrame().ReleaseWhenFrameComplete(std::move(cbv0_resource));
+            cvb0->GetResource()->GetGPUVirtualAddress());
 
         const auto uav_heap2 = uav_heap.Get();
         context->command_list->SetDescriptorHeaps(1, &uav_heap2);
