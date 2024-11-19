@@ -19,7 +19,7 @@ namespace d3d12
 
         void Initialize();
 
-        void Render();
+        void Render(DirectX::XMVECTOR& position);
         void Resize();
 
     private:

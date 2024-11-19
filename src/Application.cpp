@@ -23,6 +23,18 @@ void Application::Init(std::shared_ptr<IRenderer> new_renderer)
     {
         switch (key)
         {
+        case Scancode::S_W:
+            forward_speed = move_speed;
+            break;
+        case Scancode::S_S:
+            forward_speed = -move_speed;
+            break;
+        case Scancode::S_A:
+            strafe_speed = move_speed;
+            break;
+        case Scancode::S_D:
+            strafe_speed = -move_speed;
+            break;
         default:
             break;
         }
@@ -32,6 +44,18 @@ void Application::Init(std::shared_ptr<IRenderer> new_renderer)
     {
         switch (key)
         {
+        case Scancode::S_W:
+            forward_speed = 0.0f;
+            break;
+        case Scancode::S_S:
+            forward_speed = 0.0f;
+            break;
+        case Scancode::S_A:
+            strafe_speed = 0.0f;
+            break;
+        case Scancode::S_D:
+            strafe_speed = 0.0f;
+            break;
         default:
             break;
         }
@@ -64,7 +88,10 @@ void Application::Update()
 
     GuiUpdate();
 
-    renderer->Render();
+    position.z += forward_speed;
+    position.x += strafe_speed;
+
+    renderer->Render(position);
 }
 
 bool Application::GuiUpdate()

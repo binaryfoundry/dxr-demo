@@ -193,18 +193,15 @@ namespace raytracing
     }
 
     void TopStructure::Render(
+        DirectX::XMVECTOR& position,
         ComPtr<ID3D12DescriptorHeap>& uav_heap,
         const D3D12_DISPATCH_RAYS_DESC& dispatch_desc)
     {
         using namespace DirectX;
 
         InstanceUniforms uniforms;
-        uniforms.Transform = XMMatrixTranslationFromVector(translation);
+        uniforms.Transform = XMMatrixTranslationFromVector(position);
         uniforms.Transform = XMMatrixTranspose(uniforms.Transform);
-
-        translation = XMVector3Transform(
-            translation,
-            XMMatrixTranslation(0.0f, 0.01f, 0.0f));
 
         D3D12MA::ResourcePtr& cvb0 = FrameResources().constants;
 

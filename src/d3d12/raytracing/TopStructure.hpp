@@ -45,8 +45,6 @@ namespace raytracing
         void Initialize();
         void UpdateTransforms();
 
-        DirectX::XMVECTOR translation = { 0, 1.5, -7, 1 };
-
     public:
         TopStructure(
             std::shared_ptr<d3d12::Context> context,
@@ -55,6 +53,7 @@ namespace raytracing
 
         void Update();
         void Render(
+            DirectX::XMVECTOR& position,
             ComPtr<ID3D12DescriptorHeap>& uav_heap,
             const D3D12_DISPATCH_RAYS_DESC& dispatch_desc);
 

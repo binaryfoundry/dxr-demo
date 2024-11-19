@@ -348,7 +348,7 @@ namespace d3d12
         render_target.reset(rt_alloc);
     }
 
-    void Scene::Render()
+    void Scene::Render(DirectX::XMVECTOR& position)
     {
         context->command_list->SetPipelineState1(
             pso);
@@ -403,7 +403,7 @@ namespace d3d12
 
             tlas->Update();
 
-            tlas->Render(uav_heap, dispatch_desc);
+            tlas->Render(position, uav_heap, dispatch_desc);
         }
 
         ID3D12Resource* back_buffer;

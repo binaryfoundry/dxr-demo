@@ -315,7 +315,7 @@ namespace d3d12
         imgui->Resize();
     }
 
-    void Renderer::Render()
+    void Renderer::Render(glm::vec3& position)
     {
         auto barrier_0 = CD3DX12_RESOURCE_BARRIER::Transition(
             context->CurrentFrame().render_target.Get(),
@@ -358,7 +358,9 @@ namespace d3d12
         context->command_list->RSSetScissorRects(
             1, &scissor_rect);
 
-        scene->Render();
+        DirectX::XMVECTOR dx_position = { -position.x, position.y, position.z };
+        scene->Render(dx_position);
+
         imgui->Render();
 
         auto barrier_1 = CD3DX12_RESOURCE_BARRIER::Transition(
