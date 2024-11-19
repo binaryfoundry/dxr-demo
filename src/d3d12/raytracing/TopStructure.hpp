@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../Context.hpp"
-#include "../Constants.hpp"
 #include "../Allocator.hpp"
 
 #include "BottomStructure.hpp"

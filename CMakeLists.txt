@@ -85,7 +85,6 @@ set(HEADERS_IMGUI
 set(SOURCES_D3D12
     src/d3d12/Allocator.cpp
     src/d3d12/Renderer.cpp
-    src/d3d12/Constants.cpp
     src/d3d12/Context.cpp
     src/d3d12/Descriptor.cpp
     src/d3d12/Frame.cpp
@@ -95,7 +94,6 @@ set(SOURCES_D3D12
 set(HEADERS_D3D12
     src/d3d12/Allocator.hpp
     src/d3d12/Renderer.hpp
-    src/d3d12/Constants.hpp
     src/d3d12/Context.hpp
     src/d3d12/Descriptor.hpp
     src/d3d12/Frame.hpp
