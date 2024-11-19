@@ -33,11 +33,6 @@ namespace d3d12
     {
     }
 
-    void Scene::MoveToNextFrame()
-    {
-        tlas->MoveToNextFrame();
-    }
-
     void Scene::Initialize()
     {
         InitMeshes();
@@ -117,6 +112,18 @@ namespace d3d12
 
         D3D12_ROOT_PARAMETER params[] =
         {
+            // Slot 0: CBV
+            {
+                .ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV,
+                .Descriptor =
+                {
+                    .ShaderRegister = 0, // b0
+                    .RegisterSpace = 0
+                },
+                .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL
+            },
+
+            // Slot 1: UAV Descriptor Table
             {
                 .ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE,
                 .DescriptorTable =
@@ -126,6 +133,7 @@ namespace d3d12
                 }
             },
 
+            // Slot 2: SRV
             {
                 .ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV,
                 .Descriptor =

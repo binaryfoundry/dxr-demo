@@ -208,8 +208,6 @@ namespace d3d12
 
         cur_frame.ReleaseFrameComplete();
 
-        scene->MoveToNextFrame();
-
         ResetCommandList();
     }
 

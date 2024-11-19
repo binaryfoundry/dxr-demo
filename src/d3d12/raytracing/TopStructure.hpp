@@ -24,7 +24,6 @@ namespace raytracing
 
     struct CurrentFrameResources
     {
-        ConstantBufferPool<InstanceUniforms> constant_pool;
         D3D12MA::ResourcePtr tlas_update_scratch;
     };
 
@@ -46,18 +45,18 @@ namespace raytracing
         void Initialize();
         void UpdateTransforms();
 
+        DirectX::XMVECTOR translation = { 0, 1.5, -7, 1 };
+
     public:
         TopStructure(
             std::shared_ptr<d3d12::Context> context,
             const std::vector<std::shared_ptr<BottomStructure>>& instance_list);
-        virtual ~TopStructure();
+        virtual ~TopStructure() = default;
 
         void Update();
         void Render(
             ComPtr<ID3D12DescriptorHeap>& uav_heap,
             const D3D12_DISPATCH_RAYS_DESC& dispatch_desc);
-
-        void MoveToNextFrame();
 
         D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress();
     };

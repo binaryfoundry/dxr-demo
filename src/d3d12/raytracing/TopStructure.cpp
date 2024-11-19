@@ -14,14 +14,6 @@ namespace raytracing
     {
     }
 
-    TopStructure::~TopStructure()
-    {
-        for (UINT i = 0; i < FRAME_COUNT; i++)
-        {
-            frame_resources[i].constant_pool.pool.clear();
-        }
-    }
-
     CurrentFrameResources& TopStructure::FrameResources()
     {
         return frame_resources[context->frame_index];
@@ -182,40 +174,58 @@ namespace raytracing
         ComPtr<ID3D12DescriptorHeap>& uav_heap,
         const D3D12_DISPATCH_RAYS_DESC& dispatch_desc)
     {
+        using namespace DirectX;
+
         InstanceUniforms uniforms;
+        uniforms.Transform = XMMatrixTranslationFromVector(translation);
+        uniforms.Transform = XMMatrixTranspose(uniforms.Transform);
 
-        DescriptorHandle* cbv0 = FrameResources().constant_pool.GetBuffer(
-            context.get(),
-            &uniforms);
+        translation = XMVector3Transform(
+            translation,
+            XMMatrixTranslation(0.0f, 0.01f, 0.0f));
 
-        const D3D12_GPU_DESCRIPTOR_HANDLE table = context->gpu_descriptor_ring_buffer->StoreTableInit();
+        auto resource_desc = BASIC_BUFFER_DESC;
+        resource_desc.Width = sizeof(InstanceUniforms);
 
-        context->gpu_descriptor_ring_buffer->StoreTableCBV(
-            cbv0);
+        D3D12MA::ALLOCATION_DESC allocation_desc = {};
+        allocation_desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
 
-        context->command_list->SetComputeRootDescriptorTable(
+        D3D12MA::Allocation* cbv0_alloc = nullptr;
+        context->allocator->CreateResource(
+            &allocation_desc,
+            &resource_desc,
+            D3D12_RESOURCE_STATE_COMMON,
+            NULL,
+            &cbv0_alloc,
+            __uuidof(ID3D12Resource),
+            nullptr);
+
+        D3D12MA::ResourcePtr cbv0_resource(cbv0_alloc);
+
+        void* ptr;
+        cbv0_resource->GetResource()->Map(0, nullptr, &ptr);
+        memcpy(ptr, &uniforms, sizeof(uniforms));
+        cbv0_resource->GetResource()->Unmap(0, nullptr);
+
+        context->command_list->SetComputeRootConstantBufferView(
             0,
-            table);
+            cbv0_resource->GetResource()->GetGPUVirtualAddress());
 
-        // TODO add to gpu_descriptor_ring_buffer table
+        context->CurrentFrame().ReleaseWhenFrameComplete(std::move(cbv0_resource));
+
         const auto uav_heap2 = uav_heap.Get();
         context->command_list->SetDescriptorHeaps(1, &uav_heap2);
 
         const auto uav_table = uav_heap2->GetGPUDescriptorHandleForHeapStart();
 
         context->command_list->SetComputeRootDescriptorTable(
-            0, uav_table); // ?u0 ?t0
+            1, uav_table);
 
         context->command_list->SetComputeRootShaderResourceView(
-            1,
+            2,
             tlas->GetResource()->GetGPUVirtualAddress());
 
         context->command_list->DispatchRays(&dispatch_desc);
-    }
-
-    void TopStructure::MoveToNextFrame()
-    {
-        FrameResources().constant_pool.Reset();
     }
 
     D3D12_GPU_VIRTUAL_ADDRESS TopStructure::GetGPUVirtualAddress()

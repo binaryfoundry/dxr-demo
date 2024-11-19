@@ -22,8 +22,6 @@ namespace d3d12
         void Render();
         void Resize();
 
-        void MoveToNextFrame();
-
     private:
         std::shared_ptr<d3d12::Context> context;
 

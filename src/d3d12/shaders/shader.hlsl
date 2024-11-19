@@ -17,7 +17,6 @@ RaytracingAccelerationStructure scene : register(t0);
 
 RWTexture2D<float4> uav : register(u0);
 
-static const float3 camera = float3(0, 1.5, -7);
 static const float3 light = float3(0, 200, 0);
 static const float3 skyTop = float3(0.24, 0.44, 0.72);
 static const float3 skyBottom = float3(0.75, 0.86, 0.93);
@@ -25,18 +24,19 @@ static const float3 skyBottom = float3(0.75, 0.86, 0.93);
 [shader("raygeneration")]
 void RayGeneration()
 {
+    float3 origin = mul(float4(0.0, 0.0, 0.0, 1.0), Transform).xyz;
 
     uint2 idx = DispatchRaysIndex().xy;
     float2 size = DispatchRaysDimensions().xy;
 
     float2 uv = idx / size;
     float3 target = float3((uv.x * 2 - 1) * 1.8 * (size.x / size.y),
-                           (1 - uv.y) * 4 - 2 + camera.y,
+                           (1 - uv.y) * 4 - 2 + origin.y,
                            0);
 
     RayDesc ray;
-    ray.Origin = camera;
-    ray.Direction = target - camera;
+    ray.Origin = origin;
+    ray.Direction = target - origin;
     ray.TMin = 0.001;
     ray.TMax = 1000;
 
