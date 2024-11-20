@@ -8,6 +8,7 @@
 #include "Imgui.hpp"
 #include "Scene.hpp"
 
+#include "../Camera.hpp"
 #include "../math/Math.hpp"
 #include "../interfaces/IRenderer.hpp"
 
@@ -21,7 +22,7 @@ namespace d3d12
 
         void Initialize(const uint32_t width, const uint32_t height);
         void SetSize(const uint32_t width, const uint32_t height);
-        void Render(glm::vec3& position);
+        void Render(Camera& camera);
         void Destroy();
 
     private:

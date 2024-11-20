@@ -17,14 +17,16 @@ set(SOURCES
     src/Context.cpp
     src/Timing.cpp
     src/Input.cpp
-    src/File.cpp)
+    src/File.cpp
+    src/Camera.cpp)
 
 set(HEADERS
     src/Application.hpp
     src/Context.hpp
     src/Timing.hpp
     src/Input.hpp
-    src/File.hpp)
+    src/File.hpp
+    src/Camera.hpp)
 
 set(SOURCES_INTERFACES
     src/interfaces/IApplication.cpp

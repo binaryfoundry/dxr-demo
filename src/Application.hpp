@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "Timing.hpp"
+#include "Camera.hpp"
 
 #include "properties/Property.hpp"
 #include "interfaces/IApplication.hpp"
@@ -19,9 +20,7 @@ private:
     float forward_speed = 0.0f;
     float strafe_speed = 0.0f;
 
-    glm::mat4 projection;
-    glm::mat4 view;
-    glm::vec3 position = glm::vec3(0.0, 1.5, -7.0);
+    Camera camera;
 
     Properties::Property<float> prop;
 
@@ -30,6 +29,8 @@ private:
     bool GuiUpdate();
 
 public:
+    Application();
+
     void Init(std::shared_ptr<IRenderer> renderer);
     void Deinit();
     void Update();

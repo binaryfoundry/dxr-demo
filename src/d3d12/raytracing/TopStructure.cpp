@@ -25,7 +25,7 @@ namespace raytracing
         for (size_t i = 0; i < FRAME_COUNT; i++)
         {
             auto resource_desc = BASIC_BUFFER_DESC;
-            resource_desc.Width = sizeof(InstanceUniforms);
+            resource_desc.Width = sizeof(RaytracingUniforms);
 
             D3D12MA::ALLOCATION_DESC allocation_desc = {};
             allocation_desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
@@ -182,8 +182,8 @@ namespace raytracing
         cube *= XMMatrixTranslation(-1.5, 2, 2);
         set(0, cube);
 
-        auto mirror = XMMatrixRotationX(-1.8f);
-        mirror *= XMMatrixRotationY(XMScalarSinEst(time) / 8 + 1);
+        auto mirror = XMMatrixRotationX(1.8f);
+        mirror *= XMMatrixRotationY(XMScalarSinEst(time) / 8 - 1);
         mirror *= XMMatrixTranslation(2, 2, 2);
         set(1, mirror);
 
@@ -193,15 +193,15 @@ namespace raytracing
     }
 
     void TopStructure::Render(
-        DirectX::XMVECTOR& position,
+        Camera& camera,
         ComPtr<ID3D12DescriptorHeap>& uav_heap,
         const D3D12_DISPATCH_RAYS_DESC& dispatch_desc)
     {
         using namespace DirectX;
 
-        InstanceUniforms uniforms;
-        uniforms.Transform = XMMatrixTranslationFromVector(position);
-        uniforms.Transform = XMMatrixTranspose(uniforms.Transform);
+        RaytracingUniforms uniforms;
+        uniforms.Position = glm::vec4(camera.Position(), 1.0);
+        uniforms.View = camera.View();
 
         D3D12MA::ResourcePtr& cvb0 = FrameResources().constants;
 

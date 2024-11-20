@@ -15,6 +15,11 @@ int main(int argc, char* argv[])
     return sdl_init(app);
 }
 
+Application::Application() :
+    camera(glm::vec3(0.0, 1.5, 7.0))
+{
+}
+
 void Application::Init(std::shared_ptr<IRenderer> new_renderer)
 {
     renderer = new_renderer;
@@ -83,15 +88,32 @@ void Application::Update()
     fps_time = timer_start();
     fps_time_avg = fps_alpha * fps_time_avg + (1.0f - fps_alpha) * time_ms;
 
+    const float fps_scale = std::max<float>(
+        1.0f / std::min<float>(5.0f, fps_time_avg / 16.66666f), 0.1f);
+
     context->property_manager.Update(
         time_ms / 1000.0f);
 
     GuiUpdate();
 
-    position.z += forward_speed;
-    position.x += strafe_speed;
+    const float window_aspect_ratio =
+        static_cast<float>(window_width) /
+        window_height;
 
-    renderer->Render(position);
+    const float mouse_speed = 75.0f;
+
+    camera.Yaw(
+        static_cast<float>(captured_mouse_delta_x) /
+        (mouse_speed * fps_scale * window_aspect_ratio));
+
+    camera.Pitch(
+        static_cast<float>(captured_mouse_delta_y) /
+        (mouse_speed * fps_scale));
+
+    camera.Strafe(strafe_speed / fps_scale);
+    camera.Forward(forward_speed / fps_scale);
+
+    renderer->Render(camera);
 }
 
 bool Application::GuiUpdate()

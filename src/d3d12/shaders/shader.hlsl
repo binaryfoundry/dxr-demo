@@ -7,10 +7,13 @@ struct Payload
 
 cbuffer Uniforms : register(b0)
 {
-    matrix Transform;
-    matrix Scale;
-    matrix Padding1;
-    matrix Padding2;
+    float4 Position;
+    float4 Padding0;
+    float4 Padding1;
+    float4 Padding2;
+    matrix View;
+    matrix Padding4;
+    matrix Padding5;
 };
 
 RaytracingAccelerationStructure scene : register(t0);
@@ -21,22 +24,42 @@ static const float3 light = float3(0, 200, 0);
 static const float3 skyTop = float3(0.24, 0.44, 0.72);
 static const float3 skyBottom = float3(0.75, 0.86, 0.93);
 
+float3 Ray_screen(float2 coords) {
+    coords = float2(coords.x, 1.0 - coords.y);
+
+    float zoom = 1.0;
+    // TODO Fix hard coded values
+    float aspect = 1080.0 / 1920.0;
+    float size = 1.0 / zoom;
+
+    float4 h = float4(size * 2.0, 0.0, 0.0, 1.0);
+    float4 v = float4(0.0, size * 2.0 * aspect, 0.0, 1.0);
+    float4 c = float4(-size, -size * aspect, -1.5, 1.0);
+
+    h = mul(h, View);
+    v = mul(v, View);
+    c = mul(c, View);
+
+    float3 direction = normalize(
+        (c + coords.x * h + coords.y * v).xyz);
+
+    return direction;
+}
+
+
 [shader("raygeneration")]
 void RayGeneration()
 {
-    float3 origin = mul(float4(0.0, 0.0, 0.0, 1.0), Transform).xyz;
+    float3 origin = Position.xyz;
 
     uint2 idx = DispatchRaysIndex().xy;
     float2 size = DispatchRaysDimensions().xy;
 
     float2 uv = idx / size;
-    float3 target = float3((uv.x * 2 - 1) * 1.8 * (size.x / size.y),
-                           (1 - uv.y) * 4 - 2 + origin.y,
-                           0);
 
     RayDesc ray;
     ray.Origin = origin;
-    ray.Direction = target - origin;
+    ray.Direction = Ray_screen(uv);
     ray.TMin = 0.001;
     ray.TMax = 1000;
 

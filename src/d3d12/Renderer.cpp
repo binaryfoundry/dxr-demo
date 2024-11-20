@@ -67,6 +67,7 @@ namespace d3d12
             .Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
         };
 
+
         context->device->CreateCommandQueue(
             &cmd_queue_desc,
             IID_PPV_ARGS(&context->command_queue));
@@ -315,7 +316,7 @@ namespace d3d12
         imgui->Resize();
     }
 
-    void Renderer::Render(glm::vec3& position)
+    void Renderer::Render(Camera& camera)
     {
         auto barrier_0 = CD3DX12_RESOURCE_BARRIER::Transition(
             context->CurrentFrame().render_target.Get(),
@@ -358,8 +359,7 @@ namespace d3d12
         context->command_list->RSSetScissorRects(
             1, &scissor_rect);
 
-        DirectX::XMVECTOR dx_position = { -position.x, position.y, position.z };
-        scene->Render(dx_position);
+        scene->Render(camera);
 
         imgui->Render();
 

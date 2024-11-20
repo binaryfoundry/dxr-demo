@@ -3,6 +3,7 @@
 #include <array>
 #include <memory>
 
+#include "../Camera.hpp"
 #include "Context.hpp"
 
 #include "raytracing/TopStructure.hpp"
@@ -19,7 +20,7 @@ namespace d3d12
 
         void Initialize();
 
-        void Render(DirectX::XMVECTOR& position);
+        void Render(Camera& camera);
         void Resize();
 
     private:

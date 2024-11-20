@@ -2,7 +2,7 @@
 
 #include "../Context.hpp"
 #include "../Allocator.hpp"
-
+#include "../../Camera.hpp"
 #include "BottomStructure.hpp"
 
 #include <vector>
@@ -13,12 +13,15 @@ namespace d3d12
 {
 namespace raytracing
 {
-    struct InstanceUniforms
+    struct RaytracingUniforms
     {
-        DirectX::XMMATRIX Transform;
-        DirectX::XMMATRIX Scale;
-        DirectX::XMMATRIX Padding1;
-        DirectX::XMMATRIX Padding2;
+        glm::vec4 Position;
+        glm::vec4 Padding0;
+        glm::vec4 Padding1;
+        glm::vec4 Padding2;
+        glm::mat4 View;
+        glm::mat4 Padding4;
+        glm::mat4 Padding5;
     };
 
     struct CurrentFrameResources
@@ -53,7 +56,7 @@ namespace raytracing
 
         void Update();
         void Render(
-            DirectX::XMVECTOR& position,
+            Camera& camera,
             ComPtr<ID3D12DescriptorHeap>& uav_heap,
             const D3D12_DISPATCH_RAYS_DESC& dispatch_desc);
 
