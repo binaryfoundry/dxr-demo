@@ -7,7 +7,6 @@
 
 #include <vector>
 #include <memory>
-#include <DirectXMath.h>
 
 namespace d3d12
 {

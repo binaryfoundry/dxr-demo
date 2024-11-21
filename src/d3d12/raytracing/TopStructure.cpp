@@ -3,6 +3,8 @@
 #include "Allocation.hpp"
 #include <stdexcept>
 
+#include <DirectXMath.h>
+
 namespace d3d12
 {
 namespace raytracing

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <algorithm>
 
 #include "Frame.hpp"
 #include "Context.hpp"

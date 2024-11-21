@@ -5,11 +5,6 @@
 #include "Allocator.hpp"
 #include "Descriptor.hpp"
 
-#include <d3d12.h>
-#include <dxgi1_4.h>
-
-#include <wrl.h>
-
 using Microsoft::WRL::ComPtr;
 
 namespace d3d12
