@@ -35,7 +35,7 @@ public:
     int window_width;
     int window_height;
 
-    bool mouse_captured;
+    bool mouse_captured = false;
     int16_t mouse_x;
     int16_t mouse_y;
     int16_t mouse_delta_x;
