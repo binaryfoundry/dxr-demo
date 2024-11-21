@@ -10,10 +10,8 @@ namespace d3d12
 namespace raytracing
 {
     TopStructure::TopStructure(
-        std::shared_ptr<d3d12::Context> context,
-        const std::vector<std::shared_ptr<BottomStructure>>& instance_list) :
-        context(context),
-        instance_list(instance_list)
+        std::shared_ptr<d3d12::Context> context) :
+        context(context)
     {
     }
 
@@ -22,7 +20,9 @@ namespace raytracing
         return frame_resources[context->frame_index];
     }
 
-    void TopStructure::Initialize()
+    void TopStructure::Initialize(
+        std::vector<std::shared_ptr<raytracing::BottomStructure>>& blas_list,
+        EntityList& entities)
     {
         // TODO move internal to FrameResources
         for (size_t i = 0; i < FRAME_COUNT; i++)
@@ -47,7 +47,7 @@ namespace raytracing
         }
 
         auto instances_desc = BASIC_BUFFER_DESC;
-        instances_desc.Width = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * instance_list.size();
+        instances_desc.Width = sizeof(D3D12_RAYTRACING_INSTANCE_DESC) * entities.size();
 
         D3D12MA::ALLOCATION_DESC allocation_desc = {};
         allocation_desc.HeapType = D3D12_HEAP_TYPE_UPLOAD;
@@ -66,13 +66,16 @@ namespace raytracing
         instances->GetResource()->Map(0, nullptr, reinterpret_cast<void**>(
             &instance_data));
 
-        for (UINT i = 0; i < instance_list.size(); ++i)
+        for (UINT i = 0; i < entities.size(); ++i)
         {
+            auto& entity = entities[i];
+            auto& blas = blas_list[entity.instance_id];
+
             instance_data[i] =
             {
-                .InstanceID = i,
+                .InstanceID = static_cast<UINT>(entity.instance_id),
                 .InstanceMask = 1,
-                .AccelerationStructure = instance_list[i]->GetGPUVirtualAddress(),
+                .AccelerationStructure = blas->GetGPUVirtualAddress(),
             };
         }
 
@@ -80,7 +83,7 @@ namespace raytracing
         {
             .Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL,
             .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE,
-            .NumDescs = static_cast<UINT>(instance_list.size()),
+            .NumDescs = static_cast<UINT>(entities.size()),
             .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY,
             .InstanceDescs = instances->GetResource()->GetGPUVirtualAddress()
         };
@@ -121,18 +124,39 @@ namespace raytracing
         uavBarrier.UAV.pResource = nullptr; // Applies to all UAV writes
 
         context->command_list->ResourceBarrier(1, &uavBarrier);
-
-        initialized = true;
     }
 
-    void TopStructure::Update()
+    void TopStructure::Update(
+        EntityList& entities)
     {
-        if (!initialized)
+        using namespace DirectX;
+        auto set = [&](int idx, XMMATRIX mx)
         {
-            Initialize();
-        }
+            auto* ptr = reinterpret_cast<XMFLOAT3X4*>(
+                &instance_data[idx].Transform);
 
-        UpdateTransforms();
+            XMStoreFloat3x4(ptr, mx);
+        };
+
+        for (UINT i = 0; i < entities.size(); i++)
+        {
+            const auto& entity = entities[i];
+
+            // TODO Just use GLM
+            auto transform = XMMatrixScaling(
+                entity.scale.x,
+                entity.scale.y,
+                entity.scale.z);
+
+            // TODO set rotation
+
+            transform *= XMMatrixTranslation(
+                entity.position.x,
+                entity.position.y,
+                entity.position.z);
+
+            set(i, transform);
+        }
 
         const D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC desc =
         {
@@ -141,7 +165,7 @@ namespace raytracing
             {
                 .Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL,
                 .Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE,
-                .NumDescs = static_cast<UINT>(instance_list.size()),
+                .NumDescs = static_cast<UINT>(entities.size()),
                 .DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY,
                 .InstanceDescs = instances->GetResource()->GetGPUVirtualAddress()
             },
@@ -166,41 +190,15 @@ namespace raytracing
         context->command_list->ResourceBarrier(1, &barrier);
     }
 
-    static float time = 0.0f;
-
-    void TopStructure::UpdateTransforms()
-    {
-        using namespace DirectX;
-        auto set = [&](int idx, XMMATRIX mx)
-            {
-                auto* ptr = reinterpret_cast<XMFLOAT3X4*>(
-                    &instance_data[idx].Transform);
-
-                XMStoreFloat3x4(ptr, mx);
-            };
-
-        time += 0.01f;
-
-        auto cube = XMMatrixRotationRollPitchYaw(time / 2, time / 3, time / 5);
-        cube *= XMMatrixTranslation(-1.5, 2, 2);
-        set(0, cube);
-
-        auto mirror = XMMatrixRotationX(1.8f);
-        mirror *= XMMatrixRotationY(XMScalarSinEst(time) / 8 - 1);
-        mirror *= XMMatrixTranslation(2, 2, 2);
-        set(1, mirror);
-
-        auto floor = XMMatrixScaling(5, 5, 5);
-        floor *= XMMatrixTranslation(0, 0, 2);
-        set(2, floor);
-    }
-
     void TopStructure::Render(
         Camera& camera,
+        EntityList& entities,
         ComPtr<ID3D12DescriptorHeap>& uav_heap,
         const D3D12_DISPATCH_RAYS_DESC& dispatch_desc)
     {
         using namespace DirectX;
+
+        Update(entities);
 
         RaytracingUniforms uniforms;
         uniforms.Position = glm::vec4(camera.Position(), 1.0);

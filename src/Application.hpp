@@ -4,6 +4,7 @@
 
 #include "Timing.hpp"
 #include "Camera.hpp"
+#include "Entities.hpp"
 
 #include "properties/Property.hpp"
 #include "interfaces/IApplication.hpp"
@@ -21,6 +22,7 @@ private:
     float strafe_speed = 0.0f;
 
     Camera camera;
+    EntityList entities;
 
     Properties::Property<float> prop;
 

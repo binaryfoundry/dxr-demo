@@ -94,9 +94,9 @@ void ClosestHit(inout Payload payload,
 
     switch (InstanceID())
     {
-        case 0: HitCube(payload, attrib.barycentrics); break;
-        case 1: HitMirror(payload, attrib.barycentrics); break;
-        case 2: HitFloor(payload, attrib.barycentrics); break;
+        case 0: HitFloor(payload, attrib.barycentrics); break;
+        case 1: HitCube(payload, attrib.barycentrics); break;
+        case 2: HitMirror(payload, attrib.barycentrics); break;
 
         default: payload.color = float3(1, 0, 1); break;
     }

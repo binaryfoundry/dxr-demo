@@ -93,13 +93,8 @@ namespace d3d12
         blas_init_list.push_back(quad_blas);
         blas_init_list.push_back(cube_blas);
 
-        std::vector<std::shared_ptr<raytracing::BottomStructure>> instance_list;
-        instance_list.push_back(cube_blas);
-        instance_list.push_back(quad_blas);
-        instance_list.push_back(quad_blas);
-
-        tlas = std::make_shared<raytracing::TopStructure>(
-            context, instance_list);
+        blas_list.push_back(quad_blas);
+        blas_list.push_back(cube_blas);
     }
 
     void Scene::InitRootSignature()
@@ -348,7 +343,9 @@ namespace d3d12
         render_target.reset(rt_alloc);
     }
 
-    void Scene::Render(Camera& camera)
+    void Scene::Render(
+        Camera& camera,
+        EntityList& entities)
     {
         context->command_list->SetPipelineState1(
             pso);
@@ -401,9 +398,21 @@ namespace d3d12
                 blas_init_list.clear();
             }
 
-            tlas->Update();
+            if (!tlas)
+            {
+                tlas = std::make_shared<raytracing::TopStructure>(
+                    context);
 
-            tlas->Render(camera, uav_heap, dispatch_desc);
+                tlas->Initialize(
+                    blas_list,
+                    entities);
+            }
+
+            tlas->Render(
+                camera,
+                entities,
+                uav_heap,
+                dispatch_desc);
         }
 
         ID3D12Resource* back_buffer;

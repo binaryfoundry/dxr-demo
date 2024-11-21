@@ -21,7 +21,7 @@ namespace d3d12
 
         void Initialize(const uint32_t width, const uint32_t height);
         void SetSize(const uint32_t width, const uint32_t height);
-        void Render(Camera& camera);
+        void Render(Camera& camera, EntityList& entities);
         void Destroy();
 
     private:

@@ -76,6 +76,17 @@ void Application::Init(std::shared_ptr<IRenderer> new_renderer)
             std::cout << "Complete!\n";
         }
     );
+
+    entities.resize(3);
+    entities[0].scale = glm::vec3(5, 5, 5);
+    entities[0].position = glm::vec3(0, 0, 2);
+    entities[0].instance_id = 0;
+
+    entities[1].position = glm::vec3(-1.5, 2, 2);
+    entities[1].instance_id = 1;
+
+    entities[2].position = glm::vec3(2, 2, 2);
+    entities[2].instance_id = 1;
 }
 
 void Application::Deinit()
@@ -83,9 +94,14 @@ void Application::Deinit()
 }
 
 static float zoomValue = 1.0f;
+static double ticks = 0.0;
 
 void Application::Update()
 {
+    entities[1].position.y = static_cast<float>(2.0 + sin(ticks * 0.01));
+    entities[2].position.z = static_cast<float>(2.0 + sin(ticks * 0.003));
+    ticks++;
+
     const float time_ms = timer_end(fps_time);
     fps_time = timer_start();
     fps_time_avg = fps_alpha * fps_time_avg + (1.0f - fps_alpha) * time_ms;
@@ -120,7 +136,9 @@ void Application::Update()
     camera.Strafe(strafe_speed / fps_scale);
     camera.Forward(forward_speed / fps_scale);
 
-    renderer->Render(camera);
+    renderer->Render(
+        camera,
+        entities);
 }
 
 bool Application::GuiUpdate()

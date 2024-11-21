@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "../Camera.hpp"
+#include "../Entities.hpp"
 #include "Context.hpp"
 
 #include "raytracing/TopStructure.hpp"
@@ -19,7 +20,9 @@ namespace d3d12
 
         void Initialize();
 
-        void Render(Camera& camera);
+        void Render(
+            Camera& camera,
+            EntityList& entities);
         void Resize();
 
     private:
@@ -44,6 +47,7 @@ namespace d3d12
         std::shared_ptr<raytracing::BottomStructure> cube_blas;
         std::shared_ptr<raytracing::BottomStructure> quad_blas;
 
+        std::vector<std::shared_ptr<raytracing::BottomStructure>> blas_list;
         std::vector<std::shared_ptr<raytracing::BottomStructure>> blas_init_list;
 
         void InitMeshes();

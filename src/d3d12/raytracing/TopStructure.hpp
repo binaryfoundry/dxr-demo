@@ -3,6 +3,7 @@
 #include "../Context.hpp"
 #include "../Allocator.hpp"
 #include "../../Camera.hpp"
+#include "../../Entities.hpp"
 #include "BottomStructure.hpp"
 
 #include <vector>
@@ -40,25 +41,26 @@ namespace raytracing
         CurrentFrameResources& FrameResources();
         std::array<CurrentFrameResources, FRAME_COUNT> frame_resources;
 
-        std::vector<std::shared_ptr<BottomStructure>> instance_list;
         D3D12MA::ResourcePtr instances;
         D3D12_RAYTRACING_INSTANCE_DESC* instance_data = nullptr;
 
         D3D12MA::ResourcePtr tlas;
-        bool initialized = false;
 
-        void Initialize();
-        void UpdateTransforms();
+        void Update(
+            EntityList& entities);
 
     public:
         TopStructure(
-            std::shared_ptr<d3d12::Context> context,
-            const std::vector<std::shared_ptr<BottomStructure>>& instance_list);
+            std::shared_ptr<d3d12::Context> context);
         virtual ~TopStructure() = default;
 
-        void Update();
+        void Initialize(
+            std::vector<std::shared_ptr<raytracing::BottomStructure>>& blas_list,
+            EntityList& entities);
+
         void Render(
             Camera& camera,
+            EntityList& entities,
             ComPtr<ID3D12DescriptorHeap>& uav_heap,
             const D3D12_DISPATCH_RAYS_DESC& dispatch_desc);
 

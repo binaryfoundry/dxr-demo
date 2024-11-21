@@ -316,7 +316,9 @@ namespace d3d12
         imgui->Resize();
     }
 
-    void Renderer::Render(Camera& camera)
+    void Renderer::Render(
+        Camera& camera,
+        EntityList& entities)
     {
         auto barrier_0 = CD3DX12_RESOURCE_BARRIER::Transition(
             context->CurrentFrame().render_target.Get(),
@@ -359,7 +361,9 @@ namespace d3d12
         context->command_list->RSSetScissorRects(
             1, &scissor_rect);
 
-        scene->Render(camera);
+        scene->Render(
+            camera,
+            entities);
 
         imgui->Render();
 

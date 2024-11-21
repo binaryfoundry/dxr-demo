@@ -18,7 +18,8 @@ set(SOURCES
     src/Timing.cpp
     src/Input.cpp
     src/File.cpp
-    src/Camera.cpp)
+    src/Camera.cpp
+    src/Entities.cpp)
 
 set(HEADERS
     src/Application.hpp
@@ -26,7 +27,8 @@ set(HEADERS
     src/Timing.hpp
     src/Input.hpp
     src/File.hpp
-    src/Camera.hpp)
+    src/Camera.hpp
+    src/Entities.hpp)
 
 set(SOURCES_INTERFACES
     src/interfaces/IApplication.cpp
