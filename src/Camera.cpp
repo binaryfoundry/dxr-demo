@@ -6,7 +6,7 @@ Camera::Camera(const glm::vec3 position) :
     Validate();
 }
 
-void Camera::Strafe(const float speed)
+void Camera::Strafe(const float value)
 {
     glm::vec3 strafe_direction = glm::cross(
         up,
@@ -18,30 +18,30 @@ void Camera::Strafe(const float speed)
             strafe_direction);
     }
 
-    position += strafe_direction * speed;
+    position += strafe_direction * value;
 
     validated = false;
 }
 
-void Camera::Forward(const float speed)
+void Camera::Forward(const float value)
 {
     const glm::vec3 d = glm::vec3(
         direction.x,
         direction.y,
         direction.z);
-    position += d * speed;
+    position += d * value;
 
     validated = false;
 }
 
-void Camera::Yaw(const float speed)
+void Camera::Yaw(const float value)
 {
-    orientation.yaw += speed;
+    orientation.yaw += value;
 }
 
-void Camera::Pitch(const float speed)
+void Camera::Pitch(const float value)
 {
-    orientation.pitch += speed;
+    orientation.pitch += value;
 }
 
 void Camera::Viewport(const glm::vec4 value)
@@ -49,17 +49,17 @@ void Camera::Viewport(const glm::vec4 value)
     viewport = value;
 }
 
-float Camera::Aspect()
+float Camera::Aspect() const
 {
     return viewport.w / viewport.z;
 }
 
-float Camera::Near()
+float Camera::Near() const
 {
     return near_plane;
 }
 
-float Camera::Far()
+float Camera::Far() const
 {
     return far_plane;
 }

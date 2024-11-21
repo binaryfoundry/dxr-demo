@@ -33,28 +33,28 @@ public:
     Camera(const Camera&) = delete;
     ~Camera() = default;
 
-    void Strafe(const float speed);
-    void Forward(const float speed);
+    void Strafe(const float value);
+    void Forward(const float value);
 
-    void Yaw(const float speed);
-    void Pitch(const float speed);
+    void Yaw(const float value);
+    void Pitch(const float value);
 
     void Viewport(const glm::vec4 value);
     void Zoom(const float value);
 
-    float Aspect();
-    float Near();
-    float Far();
+    float Aspect() const;
+    float Near() const;
+    float Far() const;
     float Zoom() const;
 
-    glm::vec3& Position()
+    const glm::vec3& Position()
     {
         Validate();
 
         return position;
     };
 
-    glm::mat4& View()
+    const glm::mat4& View()
     {
         Validate();
 
