@@ -82,6 +82,8 @@ void Application::Deinit()
 {
 }
 
+static float zoomValue = 1.0f;
+
 void Application::Update()
 {
     const float time_ms = timer_end(fps_time);
@@ -105,6 +107,8 @@ void Application::Update()
     camera.Viewport(
         glm::vec4(0, 0, window_width, window_height));
 
+    camera.Zoom(zoomValue);
+
     camera.Yaw(
         static_cast<float>(captured_mouse_delta_x) /
         (mouse_speed * fps_scale * window_aspect_ratio));
@@ -123,7 +127,9 @@ bool Application::GuiUpdate()
 {
     ImGui::NewFrame();
 
-    ImGui::ShowDemoWindow();
+    ImGui::Begin("Camera Controls");
+    ImGui::SliderFloat("Float Value", &zoomValue, 0.25, 4.0f);
+    ImGui::End();
 
     return false;
 }

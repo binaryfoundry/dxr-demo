@@ -40,11 +40,12 @@ public:
     void Pitch(const float speed);
 
     void Viewport(const glm::vec4 value);
+    void Zoom(const float value);
 
     float Aspect();
     float Near();
     float Far();
-    float Zoom();
+    float Zoom() const;
 
     glm::vec3& Position()
     {

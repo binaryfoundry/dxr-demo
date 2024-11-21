@@ -64,7 +64,12 @@ float Camera::Far()
     return far_plane;
 }
 
-float Camera::Zoom()
+void Camera::Zoom(const float value)
+{
+    zoom = value;
+}
+
+float Camera::Zoom() const
 {
     return zoom;
 }
