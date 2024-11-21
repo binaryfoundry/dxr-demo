@@ -1,6 +1,7 @@
 #include "TopStructure.hpp"
 
 #include "Allocation.hpp"
+#include <stdexcept>
 
 namespace d3d12
 {
@@ -207,24 +208,39 @@ namespace raytracing
         uniforms.TMax = camera.Far();
         uniforms.Zoom = camera.Zoom();
 
-        D3D12MA::ResourcePtr& cvb0 = FrameResources().constants;
+        D3D12MA::ResourcePtr& constant_buffer = FrameResources().constants;
 
-        void* ptr;
-        cvb0->GetResource()->Map(0, nullptr, &ptr);
-        memcpy(ptr, &uniforms, sizeof(uniforms));
-        cvb0->GetResource()->Unmap(0, nullptr);
+        if (!constant_buffer || !constant_buffer->GetResource())
+        {
+            throw std::runtime_error("Invalid constant buffer resource.");
+        }
+
+        void* mapped_ptr = nullptr;
+        HRESULT hr = constant_buffer->GetResource()->Map(0, nullptr, &mapped_ptr);
+        if (FAILED(hr))
+        {
+            throw std::runtime_error("Failed to map constant buffer.");
+        }
+        memcpy(mapped_ptr, &uniforms, sizeof(uniforms));
+        constant_buffer->GetResource()->Unmap(0, nullptr);
 
         context->command_list->SetComputeRootConstantBufferView(
             0,
-            cvb0->GetResource()->GetGPUVirtualAddress());
+            constant_buffer->GetResource()->GetGPUVirtualAddress());
 
-        const auto uav_heap2 = uav_heap.Get();
-        context->command_list->SetDescriptorHeaps(1, &uav_heap2);
+        const auto uav_descriptor_heap = uav_heap.Get();
+        if (!uav_descriptor_heap)
+        {
+            throw std::runtime_error("Invalid UAV descriptor heap.");
+        }
+        context->command_list->SetDescriptorHeaps(
+            1, &uav_descriptor_heap);
 
-        const auto uav_table = uav_heap2->GetGPUDescriptorHandleForHeapStart();
+        const auto uav_descriptor_table =
+            uav_descriptor_heap->GetGPUDescriptorHandleForHeapStart();
 
         context->command_list->SetComputeRootDescriptorTable(
-            1, uav_table);
+            1, uav_descriptor_table);
 
         context->command_list->SetComputeRootShaderResourceView(
             2,
