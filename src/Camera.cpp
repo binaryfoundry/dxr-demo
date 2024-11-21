@@ -44,6 +44,31 @@ void Camera::Pitch(const float speed)
     orientation.pitch += speed;
 }
 
+void Camera::Viewport(const glm::vec4 value)
+{
+    viewport = value;
+}
+
+float Camera::Aspect()
+{
+    return viewport.w / viewport.z;
+}
+
+float Camera::Near()
+{
+    return near_plane;
+}
+
+float Camera::Far()
+{
+    return far_plane;
+}
+
+float Camera::Zoom()
+{
+    return zoom;
+}
+
 void Camera::Validate()
 {
     if (validated)

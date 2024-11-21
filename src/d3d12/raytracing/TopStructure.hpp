@@ -16,7 +16,10 @@ namespace raytracing
     struct RaytracingUniforms
     {
         glm::vec4 Position;
-        glm::vec4 Padding0;
+        float TMin;
+        float TMax;
+        float Aspect;
+        float Zoom;
         glm::vec4 Padding1;
         glm::vec4 Padding2;
         glm::mat4 View;

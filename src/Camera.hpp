@@ -20,10 +20,9 @@ private:
 
     glm::mat4 view;
 
-    float fov = 80;
-    float exposure = 1.0f;
-    float near_plane = 0.1f;
-    float far_plane = 2200.0f;
+    float zoom = 1.0f;
+    float near_plane = 0.001f;
+    float far_plane = 1000.0f;
 
     bool validated = false;
 
@@ -39,6 +38,13 @@ public:
 
     void Yaw(const float speed);
     void Pitch(const float speed);
+
+    void Viewport(const glm::vec4 value);
+
+    float Aspect();
+    float Near();
+    float Far();
+    float Zoom();
 
     glm::vec3& Position()
     {

@@ -102,6 +102,9 @@ void Application::Update()
 
     const float mouse_speed = 75.0f;
 
+    camera.Viewport(
+        glm::vec4(0, 0, window_width, window_height));
+
     camera.Yaw(
         static_cast<float>(captured_mouse_delta_x) /
         (mouse_speed * fps_scale * window_aspect_ratio));

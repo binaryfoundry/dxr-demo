@@ -202,6 +202,10 @@ namespace raytracing
         RaytracingUniforms uniforms;
         uniforms.Position = glm::vec4(camera.Position(), 1.0);
         uniforms.View = camera.View();
+        uniforms.Aspect = camera.Aspect();
+        uniforms.TMin = camera.Near();
+        uniforms.TMax = camera.Far();
+        uniforms.Zoom = camera.Zoom();
 
         D3D12MA::ResourcePtr& cvb0 = FrameResources().constants;
 

@@ -8,7 +8,10 @@ struct Payload
 cbuffer Uniforms : register(b0)
 {
     float4 Position;
-    float4 Padding0;
+    float TMin;
+    float TMax;
+    float Aspect;
+    float Zoom;
     float4 Padding1;
     float4 Padding2;
     matrix View;
@@ -27,14 +30,11 @@ static const float3 skyBottom = float3(0.75, 0.86, 0.93);
 float3 Ray_screen(float2 coords) {
     coords = float2(coords.x, 1.0 - coords.y);
 
-    float zoom = 1.0;
-    // TODO Fix hard coded values
-    float aspect = 1080.0 / 1920.0;
-    float size = 1.0 / zoom;
+    float size = 1.0 / Zoom;
 
     float4 h = float4(size * 2.0, 0.0, 0.0, 1.0);
-    float4 v = float4(0.0, size * 2.0 * aspect, 0.0, 1.0);
-    float4 c = float4(-size, -size * aspect, -1.5, 1.0);
+    float4 v = float4(0.0, size * 2.0 * Aspect, 0.0, 1.0);
+    float4 c = float4(-size, -size * Aspect, -1.5, 1.0);
 
     h = mul(h, View);
     v = mul(v, View);
@@ -60,8 +60,8 @@ void RayGeneration()
     RayDesc ray;
     ray.Origin = origin;
     ray.Direction = Ray_screen(uv);
-    ray.TMin = 0.001;
-    ray.TMax = 1000;
+    ray.TMin = TMin; // 0.001;
+    ray.TMax = TMax; // 1000;
 
     Payload payload;
     payload.allowReflection = true;
