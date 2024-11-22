@@ -23,7 +23,7 @@ RaytracingAccelerationStructure scene : register(t0);
 
 RWTexture2D<float4> uav : register(u0);
 
-static const float3 light = float3(0, 200, 0);
+static const float3 light = float3(0, 200, 200);
 static const float3 skyTop = float3(0.24, 0.44, 0.72);
 static const float3 skyBottom = float3(0.75, 0.86, 0.93);
 
@@ -111,9 +111,7 @@ void HitCube(inout Payload payload, float2 uv)
 
     float3 worldNormal = normalize(mul(normal, (float3x3)ObjectToWorld4x3()));
 
-    float3 color = abs(normal) / 3 + 0.5;
-    if (uv.x < 0.03 || uv.y < 0.03)
-        color = 0.25.xxx;
+    float3 color = float3(1, 1, 1);
 
     color *= saturate(dot(worldNormal, normalize(light))) + 0.33;
     payload.color = color;
