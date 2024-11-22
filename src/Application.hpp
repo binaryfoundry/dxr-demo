@@ -19,7 +19,9 @@ private:
 
     float move_speed = 0.1f;
     float forward_speed = 0.0f;
-    float strafe_speed = 0.0f;
+    float backwards_speed = 0.0f;
+    float left_speed = 0.0f;
+    float right_speed = 0.0f;
 
     Camera camera;
     EntityList entities;

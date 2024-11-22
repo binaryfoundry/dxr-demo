@@ -32,13 +32,13 @@ void Application::Init(std::shared_ptr<IRenderer> new_renderer)
             forward_speed = move_speed;
             break;
         case Scancode::S_S:
-            forward_speed = -move_speed;
+            backwards_speed = -move_speed;
             break;
         case Scancode::S_A:
-            strafe_speed = move_speed;
+            left_speed = move_speed;
             break;
         case Scancode::S_D:
-            strafe_speed = -move_speed;
+            right_speed = -move_speed;
             break;
         default:
             break;
@@ -53,13 +53,13 @@ void Application::Init(std::shared_ptr<IRenderer> new_renderer)
             forward_speed = 0.0f;
             break;
         case Scancode::S_S:
-            forward_speed = 0.0f;
+            backwards_speed = 0.0f;
             break;
         case Scancode::S_A:
-            strafe_speed = 0.0f;
+            left_speed = 0.0f;
             break;
         case Scancode::S_D:
-            strafe_speed = 0.0f;
+            right_speed = 0.0f;
             break;
         default:
             break;
@@ -152,8 +152,8 @@ void Application::Update()
         static_cast<float>(captured_mouse_delta_y) /
         (mouse_speed * fps_scale));
 
-    camera.Strafe(strafe_speed / fps_scale);
-    camera.Forward(forward_speed / fps_scale);
+    camera.Strafe((left_speed + right_speed) / fps_scale);
+    camera.Forward((forward_speed + backwards_speed) / fps_scale);
 
     renderer->Render(
         camera,
