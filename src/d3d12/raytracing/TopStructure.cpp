@@ -130,7 +130,7 @@ namespace raytracing
         EntityList& entities)
     {
         using namespace DirectX;
-        auto set = [&](int idx, XMMATRIX mx)
+        auto set = [&](const int idx, const XMMATRIX mx)
         {
             auto* ptr = reinterpret_cast<XMFLOAT3X4*>(
                 &instance_data[idx].Transform);
@@ -142,20 +142,15 @@ namespace raytracing
         {
             const auto& entity = entities[i];
 
-            // TODO Just use GLM
-            auto transform = XMMatrixScaling(
-                entity.scale.x,
-                entity.scale.y,
-                entity.scale.z);
+            glm::mat4 transform;
+            transform = glm::translate(transform, entity.position);
+            transform *= mat4_cast(entity.orientation);
+            transform = glm::scale(transform, entity.scale);
 
-            // TODO set rotation
+            const DirectX::XMMATRIX dxMatrix = DirectX::XMLoadFloat4x4(
+                reinterpret_cast<const DirectX::XMFLOAT4X4*>(&transform));
 
-            transform *= XMMatrixTranslation(
-                entity.position.x,
-                entity.position.y,
-                entity.position.z);
-
-            set(i, transform);
+            set(i, dxMatrix);
         }
 
         const D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC desc =

@@ -96,10 +96,27 @@ void Application::Deinit()
 static float zoomValue = 1.0f;
 static double ticks = 0.0;
 
+void updateQuaternion(
+    glm::quat& quaternion,
+    const float dt,
+    const glm::vec3& rotation_axis,
+    const float angular_speed)
+{
+    const float angle = angular_speed * dt;
+    const glm::quat incremental_rotation = glm::angleAxis(
+        glm::radians(angle),
+        glm::normalize(rotation_axis));
+    quaternion = incremental_rotation * quaternion;
+    quaternion = glm::normalize(quaternion);
+}
+
 void Application::Update()
 {
     entities[1].position.y = static_cast<float>(2.0 + sin(ticks * 0.01));
     entities[2].position.z = static_cast<float>(2.0 + sin(ticks * 0.003));
+
+    updateQuaternion(entities[1].orientation, 1.0f, glm::vec3(0, 1, 0), 1.0f);
+    updateQuaternion(entities[2].orientation, 1.0f, glm::vec3(1, 0, 0), 1.0f);
     ticks++;
 
     const float time_ms = timer_end(fps_time);
