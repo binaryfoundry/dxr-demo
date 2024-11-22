@@ -78,13 +78,15 @@ void Application::Init(std::shared_ptr<IRenderer> new_renderer)
     );
 
     entities.resize(3);
-    entities[0].scale = glm::vec3(5, 5, 5);
+    entities[0].scale = glm::vec3(10, 10, 10);
     entities[0].position = glm::vec3(0, 0, 2);
     entities[0].instance_id = 0;
 
+    entities[1].scale = glm::vec3(0.5, 0.5, 0.5);
     entities[1].position = glm::vec3(-1.5, 2, 2);
     entities[1].instance_id = 1;
 
+    entities[2].scale = glm::vec3(0.5, 0.5, 0.5);
     entities[2].position = glm::vec3(2, 2, 2);
     entities[2].instance_id = 1;
 }
