@@ -78,7 +78,7 @@ void Application::Init(std::shared_ptr<IRenderer> new_renderer)
     );
 
     entities.resize(3);
-    entities[0].scale = glm::vec3(10, 10, 10);
+    entities[0].scale = glm::vec3(1000, 1000, 1000);
     entities[0].position = glm::vec3(0, 0, 2);
     entities[0].instance_id = 0;
 
