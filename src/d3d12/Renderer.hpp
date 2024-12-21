@@ -33,7 +33,16 @@ namespace d3d12
 
         void ResizeSwapChain();
 
+        void EnableDebugLayer();
+        void CreateDevice();
+        void CreateAllocator();
+        void CreateCommandQueue();
+        void CreateSwapChain();
         void CreateBackBuffer();
+        void CreateFence();
+        void InitializeImguiAndScene();
+        void CreateCommandList();
+
         void MoveToNextFrame();
         void ResetCommandList();
         void FlushGpu();

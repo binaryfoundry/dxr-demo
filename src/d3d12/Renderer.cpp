@@ -13,7 +13,6 @@ namespace d3d12
         hwnd(hwnd),
         context(std::make_shared<d3d12::Context>())
     {
-
     }
 
     Renderer::~Renderer()
@@ -41,17 +40,37 @@ namespace d3d12
         context->width = w;
         context->height = h;
 
-        if (ID3D12Debug* debug;
-            SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug))))
-        {
-            debug->EnableDebugLayer(), debug->Release();
-        }
+        EnableDebugLayer();
+        CreateDevice();
+        CreateAllocator();
+        CreateCommandQueue();
+        CreateSwapChain();
+        CreateBackBuffer();
+        CreateFence();
+        InitializeImguiAndScene();
+        CreateCommandList();
+        ResetCommandList();
+    }
 
+    void Renderer::EnableDebugLayer()
+    {
+        if (ID3D12Debug* debug; SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug))))
+        {
+            debug->EnableDebugLayer();
+            debug->Release();
+        }
+    }
+
+    void Renderer::CreateDevice()
+    {
         D3D12CreateDevice(
             nullptr,
             D3D_FEATURE_LEVEL_12_1,
             IID_PPV_ARGS(&context->device));
+    }
 
+    void Renderer::CreateAllocator()
+    {
         D3D12MA::ALLOCATOR_DESC alloc_desc = {};
         alloc_desc.Flags = D3D12MA::ALLOCATOR_FLAG_NONE;
         alloc_desc.pDevice = context->device.Get();
@@ -59,29 +78,29 @@ namespace d3d12
 
         D3D12MA::CreateAllocator(&alloc_desc, &context->allocator);
 
-        context->descriptor_allocator.reset(
-            new DescriptorAllocator(context->device.Get()));
+        context->descriptor_allocator = std::make_unique<DescriptorAllocator>(context->device.Get());
+    }
 
-        D3D12_COMMAND_QUEUE_DESC cmd_queue_desc =
-        {
+    void Renderer::CreateCommandQueue()
+    {
+        D3D12_COMMAND_QUEUE_DESC cmd_queue_desc = {
             .Type = D3D12_COMMAND_LIST_TYPE_DIRECT,
         };
-
 
         context->device->CreateCommandQueue(
             &cmd_queue_desc,
             IID_PPV_ARGS(&context->command_queue));
+    }
 
-        IDXGIFactory2* factory;
-
-        if (FAILED(CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG,
-            IID_PPV_ARGS(&factory))))
+    void Renderer::CreateSwapChain()
+    {
+        ComPtr<IDXGIFactory2> factory;
+        if (FAILED(CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&factory))))
         {
             CreateDXGIFactory2(0, IID_PPV_ARGS(&factory));
         }
 
-        DXGI_SWAP_CHAIN_DESC1 swap_chain_desc =
-        {
+        DXGI_SWAP_CHAIN_DESC1 swap_chain_desc = {
             .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
             .SampleDesc = NO_AA,
             .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
@@ -99,38 +118,30 @@ namespace d3d12
             &swap_chain_1);
 
         factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER);
-
         swap_chain_1.As(&context->swap_chain);
-
         context->frame_index = context->swap_chain->GetCurrentBackBufferIndex();
+    }
 
-        factory->Release();
-
-        CreateBackBuffer();
-
+    void Renderer::CreateFence()
+    {
         context->device->CreateFence(
             context->CurrentFrame().fence_value,
             D3D12_FENCE_FLAG_NONE,
             IID_PPV_ARGS(&context->fence));
 
-        imgui = std::make_unique<d3d12::Imgui>(context);
+        fence_event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+    }
 
+    void Renderer::InitializeImguiAndScene()
+    {
+        imgui = std::make_unique<d3d12::Imgui>(context);
         scene = std::make_unique<d3d12::Scene>(context);
         scene->Initialize();
-
         context->CurrentFrame().fence_value++;
+    }
 
-        fence_event = CreateEvent(
-            nullptr,
-            FALSE,
-            FALSE,
-            nullptr);
-
-        if (fence_event == nullptr)
-        {
-            //LogIfFailed(HRESULT_FROM_WIN32(GetLastError()));
-        }
-
+    void Renderer::CreateCommandList()
+    {
         context->device->CreateCommandList(
             0,
             D3D12_COMMAND_LIST_TYPE_DIRECT,
@@ -139,8 +150,6 @@ namespace d3d12
             IID_PPV_ARGS(&context->command_list));
 
         context->command_list->Close();
-
-        ResetCommandList();
     }
 
     void Renderer::Destroy()
@@ -151,7 +160,6 @@ namespace d3d12
     {
         context->width = w;
         context->height = h;
-
         resize_swapchain = true;
     }
 
@@ -203,16 +211,13 @@ namespace d3d12
         }
 
         cur_frame.fence_value = current_fence_value + 1;
-
         cur_frame.ReleaseFrameComplete();
-
         ResetCommandList();
     }
 
     void Renderer::ResetCommandList()
     {
         context->CurrentFrame().command_allocator->Reset();
-
         context->command_list->Reset(
             context->CurrentFrame().command_allocator.Get(),
             nullptr);
@@ -281,10 +286,7 @@ namespace d3d12
         FlushGpu();
 
         last_frame.command_allocator->Reset();
-
-        context->command_list->Reset(
-            last_frame.command_allocator.Get(),
-            nullptr);
+        context->command_list->Reset(last_frame.command_allocator.Get(), nullptr);
 
         for (int i = 0; i < FRAME_COUNT; i++)
         {
@@ -296,17 +298,13 @@ namespace d3d12
             context->width,
             context->height,
             DXGI_FORMAT_R8G8B8A8_UNORM,
-            NULL);
+            0);
 
         context->frame_index = 0;
-
         CreateBackBuffer();
 
         context->command_list->Close();
-        std::vector<ID3D12CommandList*> cmds_lists =
-        {
-            context->command_list.Get()
-        };
+        std::vector<ID3D12CommandList*> cmds_lists = { context->command_list.Get() };
 
         context->command_queue->ExecuteCommandLists(
             static_cast<UINT>(cmds_lists.size()),
@@ -316,55 +314,29 @@ namespace d3d12
         imgui->Resize();
     }
 
-    void Renderer::Render(
-        Camera& camera,
-        EntityList& entities)
+    void Renderer::Render(Camera& camera, EntityList& entities)
     {
         auto barrier_0 = CD3DX12_RESOURCE_BARRIER::Transition(
             context->CurrentFrame().render_target.Get(),
             D3D12_RESOURCE_STATE_PRESENT,
             D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-        context->command_list->ResourceBarrier(
-            1,
-            &barrier_0);
+        context->command_list->ResourceBarrier(1, &barrier_0);
 
-        const D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle =
-            context->CurrentFrame().rtv_handle.cpu_handle();
+        const D3D12_CPU_DESCRIPTOR_HANDLE rtv_handle = context->CurrentFrame().rtv_handle.cpu_handle();
 
-        context->command_list->OMSetRenderTargets(
-            1,
-            &rtv_handle,
-            false,
-            nullptr);
+        context->command_list->OMSetRenderTargets(1, &rtv_handle, false, nullptr);
 
         const FLOAT clear_color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-        context->command_list->ClearRenderTargetView(
-            rtv_handle,
-            clear_color,
-            0,
-            nullptr);
+        context->command_list->ClearRenderTargetView(rtv_handle, clear_color, 0, nullptr);
 
-        CD3DX12_VIEWPORT viewport(
-            0.0f,
-            0.0f,
-            static_cast<float>(context->width),
-            static_cast<float>(context->height));
-        context->command_list->RSSetViewports(
-            1, &viewport);
+        CD3DX12_VIEWPORT viewport(0.0f, 0.0f, static_cast<float>(context->width), static_cast<float>(context->height));
+        context->command_list->RSSetViewports(1, &viewport);
 
-        CD3DX12_RECT scissor_rect(
-            (LONG)(0),
-            (LONG)(0),
-            (LONG)(context->width),
-            (LONG)(context->height));
-        context->command_list->RSSetScissorRects(
-            1, &scissor_rect);
+        CD3DX12_RECT scissor_rect(0, 0, static_cast<LONG>(context->width), static_cast<LONG>(context->height));
+        context->command_list->RSSetScissorRects(1, &scissor_rect);
 
-        scene->Render(
-            camera,
-            entities);
-
+        scene->Render(camera, entities);
         imgui->Render();
 
         auto barrier_1 = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -372,20 +344,13 @@ namespace d3d12
             D3D12_RESOURCE_STATE_RENDER_TARGET,
             D3D12_RESOURCE_STATE_PRESENT);
 
-        context->command_list->ResourceBarrier(
-            1,
-            &barrier_1);
+        context->command_list->ResourceBarrier(1, &barrier_1);
 
         context->command_list->Close();
 
-        ID3D12CommandList* pp_command_lists[] =
-        {
-            context->command_list.Get()
-        };
+        ID3D12CommandList* pp_command_lists[] = { context->command_list.Get() };
 
-        context->command_queue->ExecuteCommandLists(
-            _countof(pp_command_lists),
-            pp_command_lists);
+        context->command_queue->ExecuteCommandLists(_countof(pp_command_lists), pp_command_lists);
 
         context->swap_chain->Present(1, 0);
 
@@ -397,5 +362,4 @@ namespace d3d12
 
         MoveToNextFrame();
     }
-
 }
