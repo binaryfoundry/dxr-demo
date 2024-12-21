@@ -281,6 +281,7 @@ namespace d3d12
         if (uav_heap.Get()) [[likely]]
         {
             uav_heap.Get()->Release();
+            uav_heap = nullptr;
         }
 
         ID3D12DescriptorHeap* new_uav_heap;

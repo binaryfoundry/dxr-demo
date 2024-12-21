@@ -33,6 +33,12 @@ namespace d3d12
             context->allocator->Release();
             context->allocator = nullptr;
         }
+
+        if (fence_event)
+        {
+            CloseHandle(fence_event);
+            fence_event = nullptr;
+        }
     }
 
     void Renderer::Initialize(const uint32_t w, const uint32_t h)
