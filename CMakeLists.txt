@@ -19,7 +19,8 @@ set(SOURCES
     src/Input.cpp
     src/File.cpp
     src/Camera.cpp
-    src/Entities.cpp)
+    src/Entities.cpp
+    src/Noise.cpp)
 
 set(HEADERS
     src/Application.hpp
@@ -28,7 +29,8 @@ set(HEADERS
     src/Input.hpp
     src/File.hpp
     src/Camera.hpp
-    src/Entities.hpp)
+    src/Entities.hpp
+    src/Noise.hpp)
 
 set(SOURCES_INTERFACES
     src/interfaces/IApplication.cpp
@@ -147,7 +149,8 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/lib/d3d12
     ${PROJECT_SOURCE_DIR}/lib/glm
     ${PROJECT_SOURCE_DIR}/lib/stb
-    ${PROJECT_SOURCE_DIR}/lib/imgui/imgui)
+    ${PROJECT_SOURCE_DIR}/lib/imgui/imgui
+    ${PROJECT_SOURCE_DIR}/lib/noise)
 
 if (WIN32)
     message(STATUS "Platform: Windows")
