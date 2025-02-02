@@ -60,7 +60,7 @@ namespace Noise
         const uint16_t sample,
         const uint16_t max_samples)
     {
-        assert(texture_data->size() == DIM * DIM);
+        assert(texture_data->size() == DIM * DIM * max_samples);
 
         for (uint32_t y = 0; y < DIM; y++)
         {
@@ -71,7 +71,7 @@ namespace Noise
                 const uint8_t b = bsample(x, y, sample, max_samples, 2);
                 const uint8_t a = bsample(x, y, sample, max_samples, 3);
 
-                const size_t i = x + (y * DIM);
+                const size_t i = x + (y * DIM) + (sample * DIM * DIM);
                 (*texture_data)[i] = { r, g, b, a };
             }
         }

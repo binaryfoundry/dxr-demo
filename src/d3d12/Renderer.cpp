@@ -3,6 +3,8 @@
 #include <Windows.h>
 #include <DirectXMath.h>
 
+#include "../Noise.hpp"
+
 #pragma comment(lib, "user32")
 #pragma comment(lib, "d3d12")
 #pragma comment(lib, "dxgi")
@@ -41,10 +43,34 @@ namespace d3d12
         }
     }
 
+    void Renderer::LoadNoise(
+        std::unique_ptr<std::vector<TexDataByteRGBA>>& noise_data,
+        const uint16_t samples = 16,
+        const uint16_t bounces = 4)
+    {
+        const uint16_t width = 128;
+        const uint16_t height = 128;
+
+        const uint16_t noise_samples = samples * bounces;
+
+        noise_data = std::make_unique<std::vector<TexDataByteRGBA>>();
+        noise_data->resize(width * height * noise_samples);
+
+        for (uint16_t i = 0; i < noise_samples; i++)
+        {
+            Noise::generate(
+                noise_data,
+                i,
+                noise_samples);
+        }
+    }
+
     void Renderer::Initialize(const uint32_t w, const uint32_t h)
     {
         context->width = w;
         context->height = h;
+
+        LoadNoise(context->noise_data);
 
         EnableDebugLayer();
         CreateDevice();

@@ -11,6 +11,7 @@ using Microsoft::WRL::ComPtr;
 
 #include "Frame.hpp"
 #include "Allocator.hpp"
+#include "../math/Math.hpp"
 
 namespace d3d12
 {
@@ -57,5 +58,7 @@ namespace d3d12
         {
             return frames[frame_index];
         }
+
+        std::unique_ptr<std::vector<TexDataByteRGBA>> noise_data;
     };
 }

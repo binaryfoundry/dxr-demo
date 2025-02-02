@@ -31,6 +31,10 @@ namespace d3d12
         std::unique_ptr<d3d12::Imgui> imgui;
         std::unique_ptr<d3d12::Scene> scene;
 
+        void LoadNoise(
+            std::unique_ptr<std::vector<TexDataByteRGBA>>& noise_data,
+            const uint16_t samples, const uint16_t bounces);
+
         void ResizeSwapChain();
 
         void EnableDebugLayer();
