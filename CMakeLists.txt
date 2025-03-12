@@ -189,12 +189,14 @@ add_executable(
     ${HEADERS_D3D12_RAYTRACING}
     ${SOURCES_D3D12_SHADERS})
 
-add_custom_target(
-    ${PROJECT_files_NAME} ALL
-    COMMENT "Copying Files..."
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/files/
-    ${CMAKE_CURRENT_BINARY_DIR}/files)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/files")
+    add_custom_target(
+        ${PROJECT_files_NAME} ALL
+        COMMENT "Copying Files..."
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/files/
+        ${CMAKE_CURRENT_BINARY_DIR}/files)
+endif()
 
 add_dependencies(
     ${PROJECT_NAME}
