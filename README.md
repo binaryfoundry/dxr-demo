@@ -1,3 +1,7 @@
+# DX12 Ray Tracing Demo
+
+![](docs/screenshot.jpg)
+
 # Requirements
 
 * CMake 3.0 or greater
